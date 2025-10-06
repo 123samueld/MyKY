@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Set the working directory to the script's location (app root)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+
+# Read paths from the JSON file using jq
+config_file="./Utilities/FilePathCompendium.json"
+backend_dir=$(jq -r '.backendDirectory | rtrimstr("/")' "$config_file")
+data_dir=$(jq -r '.utilities | rtrimstr("/")' "$config_file")
+
+# Construct the .csproj path
+csproj_path="${backend_dir}/MyKYWeb.csproj"
+
+# Check if the .csproj file exists
+if [ ! -f "$csproj_path" ]; then
+    echo "Error: Project file $csproj_path does not exist."
+    exit 1
+fi
+
+# Start backend (if it's not already running)
+cd "$backend_dir"
+dotnet run --project "$csproj_path" &
+
+# Wait a few seconds for the server to start
+sleep 3
+
+# Open the dashboard in the browser
+xdg-open http://localhost:5000/dashboard#!/bin/bash
+
+# Set the working directory to the script's location (app root)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+
+# Read paths from the JSON file using jq
+config_file="./Utilities/FilePathCompendium.json"
+backend_dir=$(jq -r '.backendDirectory | rtrimstr("/")' "$config_file")
+data_dir=$(jq -r '.utilities | rtrimstr("/")' "$config_file")
+
+# Construct the .csproj path
+csproj_path="${backend_dir}/MyKYWeb.csproj"
+
+# Check if the .csproj file exists
+if [ ! -f "$csproj_path" ]; then
+    echo "Error: Project file $csproj_path does not exist."
+    exit 1
+fi
+
+# Start backend (if it's not already running)
+cd "$backend_dir"
+dotnet run --project "$csproj_path" &
+
+# Wait a few seconds for the server to start
+sleep 3
+
+# Open the dashboard in the browser
+xdg-open http://localhost:5000/dashboard

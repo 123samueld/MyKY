@@ -1,0 +1,4 @@
+{
+    "backendDirectory": "./DatabaseSystem/MyKYWeb",
+    "utilities": "./Utilities/"
+}

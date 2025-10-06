@@ -1,2 +1,2 @@
 # MyKY
-Tracking and managing data of real estate in Kentucky.
+This app is for the purpose of more clearly visualising data about real estate in Kentucky. 
