@@ -40,12 +40,16 @@ To check the installation was correct enter this command:
 
 ## Give Permmission to launch.sh
 In the terminal, change directory to the root of the MyKY app by using "cd -path" to navigate to where you've stored the app folder. For example if it was on your desktop the command would be "cd ~.Desktop/MyKY/". Then enter this command:
+\
 chmod +x launch.sh
-This will give the launch.sh file permission to run on your machine. You may have to enter your password if not already done this session.
+\
+This will give the launch.sh file permission to run on your machine. You may have to enter your password if you haven't already done so this session.
 
 ## Create Desktop Quicklaunch Icon
-You'll need to create a new ".desktop" file in "applications". First use this command to create a new shortcut launcher: 
+You'll need to create a new ".desktop" file in "applications". First use this command to create a new shortcut launcher:
+\ 
 nano ~/.local/share/applications/MyKY.desktop
+\
 You'll be presented with a blank area. You want to paste this block of text in but first make sure the path here is the correct path to where you've put the app folder on your machine, lines "Exec" and "Icon" will need corrected for your machine: 
 \
 \
