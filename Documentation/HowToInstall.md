@@ -51,15 +51,15 @@ To test the launch.sh file is working correctly, cd to the project root dir and 
 * ./launch.sh
 
 
-The app should start to launch, there are debugging messages that should appear in the console. This will take a minuet because it's building the app from scratch every time since this is the development version, the production version will start much faster. 
+The app should start to launch, there are debugging messages that should appear in the console. This will take a while because it's clearing and building the database from scratch every time since this is the development version, the production version will only run the build so it will start much faster. 
 \
 \
 You should see debug messages like "Build succeeded, 0 warnings, 0 errors". and a few "Info" lines with localhost and content root path to project root dir/DatabaseSystem/MyKYWeb.
 \
 \
 Then a new window should open in your browser and after a moment a blank screen should open with "Goodbye Cruel World!" in the top left. If all that happens that means the app is working correctly and is being launched via the .sh file. But it still needs a Desktop Quicklaunch file.
-\
-\
+
+
 ## Create Desktop Quicklaunch Icon
 You'll need to create a new "MyKY.desktop" file in "applications". First use this command to create a new shortcut launcher:
 \ 
