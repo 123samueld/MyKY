@@ -3,9 +3,10 @@
 There are a few things you'll need to download and install for this app to work. Then there a few things you'll need to do to get the app running for the first time. Here is a quick list of downloads and actions then their description below:
 
 ### Downloaods
-* ChromeDriver
 * Google Chrome
+* ChromeDriver
 * Python 3
+* Selenium
 * JQ
 * Asp.NET
 ### Actions
@@ -13,19 +14,73 @@ There are a few things you'll need to download and install for this app to work.
 * Test launch.sh
 * Create desktop quick launch icon
 
-## How to install Chrome Driver
+## Downloads/Installs
 
-## How to install Google Chrome
+### How to Download/Install Google Chrome
+Unfortunately the scraper depends on the Google Chrome Browser, other browsers are not an option for this app. You will need to download Chrome, get the latest version from here: 
+* https://www.google.com/intl/en_uk/chrome/
 
-## How to install Python 3
+### How to Download/Install Chrome Driver
+ChromeDriver and Chrome Browser version numbers don't match well. Current latest Driver is V114 and Browser is V141 (as of 07/10/2025). The driver tends to trail behind the browser so if there are compatability issues try downloading an earlier verions of Chrome Browser. The list of Driver versions can be found here:
 
-## How to install JQ
-JQ is so launch.sh can read the JSON path to the things in this app that it launches. 
+* https://sites.google.com/chromium.org/driver/downloads
 
-To install this in Linux, Ubuntu 20.4 (probably other versions too), open the terminal and paste this command: 
-sudo apt-get install jq
+Click on one of those drivers and you'll be taken to a page like this;
 
-## How to install Asp.NET
+* https://chromedriver.storage.googleapis.com/index.html?path=114.0.5735.90/
+
+Select the Linux version, download it then extract the zip to MyKY/Utilities dir.
+
+This step has a lot of curve balls, many incorrect links that look similar on the surface. You may need to repeat this step a few times if the Driver and Browser versions are not compatable. 
+\
+After you've downloaded and installed Selenium you'll be able to test if the ChromeDriver download was correct.
+
+### How to Download/Install Python 3
+In the terminal first update the package list with:
+* sudo apt update
+Then download with:
+* sudo apt install python3
+Then test it with:
+* python3 --version
+That should write the version to the terminal output. You'll then need to install a download tool for Python called "PIP". Do this with:
+* sudo apt install python3-pip
+If successful it will say so in the terminal output. 
+
+### How to Download/Install Selenium
+Selenium is the software that I've used to actually do the real estate website scraping. It opens an instance of Google Chrome and operates like a normal human user clicking on things. It can be blocked by CAPTCHA's and other anti-machine systems but overall it's a good scraping system. Download with this command:
+
+* pip3 install selenium
+
+There should be a set of download messages. To test the download and install was correct first open a Python terminal by entering this in the standard terminal:
+
+* python3
+
+Then enter these:
+
+* import selenium
+* print(selenium.__version__)
+
+If Python Selenium was downloaded and installed correctly you'll see a version number like "4.27.1".
+
+Exit to the python terminal back to the standard terminal with:
+
+* exit()
+
+To test that Selenium is using the Chrome WebDriver correctly, first in the terminal cd to the project root dir if you're not already there, then run this command:
+ 
+ * python3 Utilities/SeleniumAndWebDriverTest.py
+
+ If Selenium and the Chrome WebDriver and both correctly downloaded and installed, there will be a brief pause, Google Chrome Browser will open with a message in the headder saying it's being controlled by automated software, it will go to google.com then the browser will close. Then a message will appear in the terminal saying "Google". This confirms Selenium and the Chrome WebDriver are working correctly. 
+
+
+
+### How to Download/Install JQ
+JQ is so launch.sh can read the JSON pathing to the things in this app that it launches. This is a design choice that makes it much easier to make updates and refactor code later, over all it's an excellent design but adds a bit of extra setup with JQ. 
+
+To install JQ in Linux, Ubuntu 20.4 (probably other versions too), open the terminal and paste this command: 
+* sudo apt-get install jq
+
+### How to Download/Install Asp.NET
 You will need to install the Asp.NET runtime for the database. This is very specific to this version of Ubuntu 20.4, the 2nd command will be different for other versions, distributions or OSs. Paste each of these commands into the terminal one by one, wait for each command to finish before entering the next:
 
 * sudo apt-get update
@@ -38,15 +93,16 @@ To check the installation was correct enter this command:
 
  If installed correctly you should see "6.0.428" in the terminal response. 
 
+## Actions
 
-## Give Permmission to launch.sh
+### Give Permmission to launch.sh
 In the terminal, change directory to the root of the MyKY app by using "cd -path" to navigate to where you've stored the app folder. For example if it was on your desktop the command would be "cd ~.Desktop/MyKY/". Then enter this command:
 
 * chmod +x launch.sh
 
 This will give the launch.sh file permission to run on your machine. You may have to enter your password if you haven't already done so this session.
 
-## Test the Lanuncher
+### Test the Lanuncher
 You must test the launch.sh file is working correctly, cd to the project root dir and enter:
 
 * ./launch.sh
@@ -61,7 +117,7 @@ You should see debug messages like "Build succeeded, 0 warnings, 0 errors". and 
 Then a new window should open in your browser and after a moment a blank screen should open with "Goodbye Cruel World!" in the top left. If all that happens that means the app is working correctly and is being launched via the .sh file. But it still needs a Desktop Quicklaunch file.
 
 
-## Create Desktop Quicklaunch Icon
+### Create Desktop Quicklaunch Icon
 You'll need to create a new "MyKY.desktop" file in "applications". First use this command to create a new shortcut launcher:
 \ 
 * nano ~/.local/share/applications/MyKY.desktop
@@ -81,12 +137,12 @@ Categories=Utility;"\
 To save press "Ctrl+O", press enter, then to exit press "Ctrl+X" \
 \
 Then refresh the desktop app list with:
-\
+
 * update-desktop-database ~/.local/share/applications/
 \
 You might have to restart or refresh to see the MyKY app icon on your desktop, do that with this command:
-\
-killall gnome-software
-\
-Click on the Desktop icon, it will take a moment because this is the development version and builds every time it's run which is slow, the production version will start up much faster. 
+
+* killall gnome-software
+
+Click on the Desktop icon, it will take a moment because this is the development version to start.
 
