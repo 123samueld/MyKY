@@ -46,8 +46,9 @@ This will give the launch.sh file permission to run on your machine. You may hav
 ## Create Desktop Quicklaunch Icon
 You'll need to create a new ".desktop" file in "applications". First use this command to create a new shortcut launcher: 
 nano ~/.local/share/applications/MyKY.desktop
-You'll be presented with a blank area. You want to paste this block of text in but first make sure the path here is the correct path to where you've put the app folder on your machine, lines "Exec" and "Icon" will need corrected for your machine:\ 
-"
+You'll be presented with a blank area. You want to paste this block of text in but first make sure the path here is the correct path to where you've put the app folder on your machine, lines "Exec" and "Icon" will need corrected for your machine: 
+\
+\
 [Desktop Entry]\
 Version=1.0\
 Type=Application\
@@ -57,7 +58,7 @@ Exec=/home/YourUsername/Desktop/MyKY/launch.sh\
 Icon=/home/YourUsername/Desktop/MyKY/Resources/Imgs/AppLaunchIcon.png\
 Terminal=false\
 Categories=Utility;"\
-To save press "Ctrl+O", press enter, then to exit press "Ctrl+X". \
+To save press "Ctrl+O", press enter, then to exit press "Ctrl+X" \
 \
 Then refresh the desktop app list with:\
 update-desktop-database ~/.local/share/applications/
