@@ -1,6 +1,6 @@
 # How to Install 
 
-There are a few things you'll need to download and install for this app to work. Then there a few things you'll need to do to get the app running the first time. Here is a quick list of downloads and actions then their description below:
+There are a few things you'll need to download and install for this app to work. Then there a few things you'll need to do to get the app running for the first time. Here is a quick list of downloads and actions then their description below:
 
 ### Downloaods
 * ChromeDriver
@@ -10,6 +10,7 @@ There are a few things you'll need to download and install for this app to work.
 * Asp.NET
 ### Actions
 * Give permission to launch.sh
+* Test launch.sh
 * Create desktop quick launch icon
 
 ## How to install Chrome Driver
@@ -44,9 +45,9 @@ In the terminal, change directory to the root of the MyKY app by using "cd -path
 * chmod +x launch.sh
 
 This will give the launch.sh file permission to run on your machine. You may have to enter your password if you haven't already done so this session.
-\
-\
-To test the launch.sh file is working correctly, cd to the project root dir and enter:
+
+## Test the Lanuncher
+You must test the launch.sh file is working correctly, cd to the project root dir and enter:
 
 * ./launch.sh
 
