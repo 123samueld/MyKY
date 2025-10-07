@@ -21,10 +21,11 @@ There are a few things you'll need to download and install for this app to work.
 ## How to install JQ
 JQ is so launch.sh can read the JSON path to the things in this app that it launches. 
 
-To install in Linux, Ubuntu 20.4 (probably other versions too), open the terminal and paste this command: 
+To install this in Linux, Ubuntu 20.4 (probably other versions too), open the terminal and paste this command: 
 sudo apt-get install jq
 
-## You will need to install the Asp.NET runtime for the database. This is very specific to this version of Ubuntu 20.4, the 2nd command will be different for other versions, distributions or OSs Paste each of these commands into the terminal one by one, wait for each command to finish before entering the next:
+## How to install Asp.NET
+You will need to install the Asp.NET runtime for the database. This is very specific to this version of Ubuntu 20.4, the 2nd command will be different for other versions, distributions or OSs. Paste each of these commands into the terminal one by one, wait for each command to finish before entering the next:
 
 * sudo apt-get update
 * wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
@@ -45,21 +46,20 @@ This will give the launch.sh file permission to run on your machine. You may hav
 ## Create Desktop Quicklaunch Icon
 You'll need to create a new ".desktop" file in "applications". First use this command to create a new shortcut launcher: 
 nano ~/.local/share/applications/MyKY.desktop
-You'll be presented with a blank area. You want to paste this block of text in but first make sure the path here is the correct path to where you've put the app folder on your machine, lines "Exec" and "Icon" will need corrected for your machine: 
+You'll be presented with a blank area. You want to paste this block of text in but first make sure the path here is the correct path to where you've put the app folder on your machine, lines "Exec" and "Icon" will need corrected for your machine:\ 
 "
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=MyKY
-Comment=Launches the local real estate scanner and opens the dashboard
-Exec=/home/YourUsername/Desktop/MyKY/launch.sh
-Icon=/home/YourUsername/Desktop/MyKY/Resources/Imgs/AppLaunchIcon.png
-Terminal=false
-Categories=Utility;
-"
-To save press "Ctrl+O", press enter, then to exit press "Ctrl+X". 
-
-Then refresh the desktop app list with:
+[Desktop Entry]\
+Version=1.0\
+Type=Application\
+Name=MyKY\
+Comment=Launches the local real estate scanner and opens the dashboard\
+Exec=/home/YourUsername/Desktop/MyKY/launch.sh\
+Icon=/home/YourUsername/Desktop/MyKY/Resources/Imgs/AppLaunchIcon.png\
+Terminal=false\
+Categories=Utility;"\
+To save press "Ctrl+O", press enter, then to exit press "Ctrl+X". \
+\
+Then refresh the desktop app list with:\
 update-desktop-database ~/.local/share/applications/
 
 
