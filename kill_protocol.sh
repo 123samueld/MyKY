@@ -1,35 +1,51 @@
 #!/bin/bash
 
 # MyKY Application Kill Script
-# This script terminates all processes related to the MyKY application
+# This script terminates specific processes related to the MyKY application based on input argument
 
-echo "🔴 MyKY Kill Protocol Initiated..."
+# Check for argument
+if [ -z "$1" ]; then
+  echo "Error: No task specified. Usage: $0 [dotnet|mykyweb|python|chrome|chromedriver|port5000]"
+  exit 1
+fi
 
-# Kill all dotnet processes (ASP.NET applications)
-echo "Terminating .NET processes..."
-pkill -9 dotnet
+case "$1" in
+  "dotnet")
+    echo "Terminating .NET processes..."
+    pkill -9 dotnet
+    echo "Done"
+    ;;
+  "mykyweb")
+    echo "Terminating MyKYWeb processes..."
+    pkill -9 -f MyKYWeb
+    echo "Done"
+    ;;
+  "python")
+    echo "Terminating Python scraper processes..."
+    pkill -9 -f "MainScraper.py"
+    pkill -9 -f "SeleniumAndWebDriverTest.py"
+    echo "Done"
+    ;;
+  "chrome")
+    echo "Terminating Chrome/Chromium processes..."
+    pkill -9 chrome
+    pkill -9 chromium-browser
+    echo "Done"
+    ;;
+  "chromedriver")
+    echo "Terminating ChromeDriver processes..."
+    pkill -9 chromedriver
+    echo "Done"
+    ;;
+  "port5000")
+    echo "Terminating processes on port 5000..."
+    lsof -ti:5000 | xargs -r kill -9
+    echo "Done"
+    ;;
+  *)
+    echo "Error: Invalid task '$1'. Valid options: dotnet, mykyweb, python, chrome, chromedriver, port5000"
+    exit 1
+    ;;
+esac
 
-# Kill any MyKYWeb processes specifically
-echo "Terminating MyKYWeb processes..."
-pkill -9 -f MyKYWeb
-
-# Kill any Python scraper processes
-echo "Terminating Python scraper processes..."
-pkill -9 -f "MainScraper.py"
-pkill -9 -f "SeleniumAndWebDriverTest.py"
-
-# Kill any Chrome/Chromium processes that might be running from scraping
-echo "Terminating Chrome/Chromium processes..."
-pkill -9 chrome
-pkill -9 chromium-browser
-
-# Kill any chromedriver processes
-echo "Terminating ChromeDriver processes..."
-pkill -9 chromedriver
-
-# Optional: Kill any processes running on port 5000 (ASP.NET default)
-echo "Terminating processes on port 5000..."
-lsof -ti:5000 | xargs -r kill -9
-
-echo "✅ MyKY Kill Protocol Complete"
-echo "All related processes have been terminated."
+exit 0
