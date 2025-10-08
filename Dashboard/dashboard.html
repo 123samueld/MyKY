@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>MyKY</title>
+    <style>
+      body {
+        position: relative;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        background-image: url("../resources/Imgs/parchment_BG.jpg");
+        background-size: cover;
+        background-position: center;
+      }
+      h1 {
+        margin: 20px 0 0 0;
+        text-align: center;
+        font-size: 2em;
+        z-index: 5; 
+      }
+      .map-container {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: -140px; 
+        max-width: 2200px;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 30px;
+      }
+      #map {
+        width: 100%;
+        height: 70vh;
+      }
+      #control-panel {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: linear-gradient(145deg, rgba(240, 240, 240, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border: 5px solid;
+        border-image: linear-gradient(to right, #A9A9A9, #C0C0C0, #A9A9A9) 1;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(169, 169, 169, 0.15);
+        z-index: 10;
+      }
+      #control-panel button {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      #control-panel button:last-child {
+        margin-bottom: 0;
+      }
+      #control-panel button:hover {
+        background: #e0e0e0;
+      }
+
+      #compass {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 200px;
+        height: 300px;
+        object-fit: cover; 
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+      }
+
+      #heraldic_shield {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 200px;
+        height: 300px;
+        object-fit: cover; 
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+      }
+
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        opacity: 0;
+        transition: opacity 0.4s ease-out;
+        pointer-events: none;
+        z-index: 1000;
+      }
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .modal-dialog {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.01);
+        transform-origin: center center;
+        background: linear-gradient(145deg, rgba(240, 240, 240, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border: 3px solid;
+        border-image: linear-gradient(to right, #A9A9A9, #C0C0C0, #A9A9A9) 1;
+        border-radius: 8px;
+        padding: 0;
+        box-shadow: 0 4px 15px rgba(169, 169, 169, 0.15);
+        width: 80vw;
+        height: 80vh;
+        max-width: 80vw;
+        max-height: 80vh;
+        overflow-y: auto;
+        z-index: 1001;
+        opacity: 0;
+        transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out;
+      }
+      .modal-overlay.active .modal-dialog {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #ddd;
+      }
+      .modal-title {
+        margin: 0;
+        font-size: 1.5em;
+        text-align: center;
+        flex: 1;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #666;
+        padding: 0 10px;
+      }
+      .modal-close:hover {
+        color: #000;
+      }
+      .modal-content {
+        padding: 20px;
+      }
+    </style>
+    <script src="mapdata.js"></script>
+    <script src="countymap.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Modal functionality
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalClose = document.getElementById('modal-close');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+    
+        // Function to open modal
+        window.openModal = function(title, content) {
+          modalTitle.textContent = title;
+          modalContent.innerHTML = content || '<p>Generic modal content goes here.</p>';
+          modalOverlay.classList.add('active');
+        };
+    
+        // Close modal functions
+        function closeModal() {
+          modalOverlay.classList.remove('active');
+        }
+    
+        modalClose.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', function(e) {
+          if (e.target === modalOverlay) {
+            closeModal();
+          }
+        });
+    
+        // Optional: Close on Escape key
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+            closeModal();
+          }
+        });
+    
+        // Attach click handlers to control panel buttons
+        const controlButtons = document.querySelectorAll('#control-panel button');
+        controlButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            openModal(this.textContent, `<p>Content for "${this.textContent}".</p>`);
+          });
+        });
+      });
+    </script>
+    </head>
+    <body>
+      <div id="control-panel">
+        <h2>Control Panel</h2>
+        <button>Sort Counties</button>
+        <button>Sort Properties</button>
+        <button>Scraper Dashboard</button>
+      </div>
+    <h1>MyKY</h1>
+    <div class="map-container">
+      <div id="map"></div>
+    </div>
+    <img id="compass" alt="Top right image" src="../resources/Imgs/compass.png"/>
+    <img id="heraldic_shield" alt="Heraldic Shield of MyKY" src="../resources/Imgs/heraldic_shield.png"/>
+    <!-- Modal Structure -->
+    <div id="modal-overlay" class="modal-overlay">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modal-title">Modal Title</h2>
+          <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-content" id="modal-content">
+          <!-- Dynamic content here -->
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
