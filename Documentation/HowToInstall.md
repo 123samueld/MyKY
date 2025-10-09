@@ -111,6 +111,14 @@ To check the installation was correct enter this command:
 
 ## Actions
 
+
+### Give Permission to kill_protocol.sh ( "Off" button)
+Terminating all the processes running in the app is a big deal this has to be set up before running the app or turning off the processes bcomes very messy. "cd" to the project root dir, this will be different on your machien but something like "cd /home/YourUsername/Desktop/MyKY/". Once you're in the project root dir enter this command:
+
+* chmod +x kill_protocol.sh
+
+At the end you'll test the "off button" later once the "on button" is setup and fully working. 
+
 ### Give Permmission to launch.sh
 In the terminal, change directory to the root of the MyKY app by using "cd -path" to navigate to where you've stored the app folder. For example if it was on your desktop the command would be "cd ~.Desktop/MyKY/". Then enter this command:
 
@@ -130,7 +138,7 @@ You should see debug messages like "Build succeeded, 0 warnings, 0 errors". and 
 \
 Then a new window should open in your browser and after a moment a blank screen should open with "Goodbye Cruel World!" in the top left. If all that happens that means the app is working correctly and is being launched via the .sh file. But it still needs a Desktop Quicklaunch file.
 
-### Create Desktop Quicklaunch Icon
+### Create Desktop Quicklaunch Icon ( "On" button)
 You'll need to create a new "MyKY.desktop" file in "applications". First use this command to create a new shortcut launcher:
 
 * nano ~/.local/share/applications/MyKY.desktop
@@ -158,6 +166,8 @@ You might have to restart or refresh to see the MyKY app icon on your desktop, d
 * killall gnome-software
 
 Click on the Desktop icon, it will take a moment because this is the development version to start.
+
+To also test the "off button", find the "Kill Protocol" button in the Control Panel, on the popup press the big red "TERMINATE" button, this will kill all processes and the whole app will close. 
 
 ## Installation Complete
 If you got through all those steps then the app is fully installed and ready to go. 
