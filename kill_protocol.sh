@@ -1,14 +1,39 @@
 #!/bin/bash
 
 # MyKY Application Kill Script
-# This script terminates specific processes related to the MyKY application based on input argument
+# This script terminates all processes related to the MyKY application when no argument is provided,
+# or specific ones if an argument is given.
 
-# Check for argument
+# Function to kill everything (clients first, server last for reliability)
+kill_all() {
+    echo "Terminating Python scraper processes..."
+    pkill -9 -f "MainScraper.py"
+    pkill -9 -f "SeleniumAndWebDriverTest.py"
+
+    echo "Terminating Chrome/Chromium processes..."
+    pkill -9 chrome
+    pkill -9 chromium-browser
+
+    echo "Terminating ChromeDriver processes..."
+    pkill -9 chromedriver
+
+    echo "Terminating processes on port 5000..."
+    fuser -k 5000/tcp  # Targeted kill of TCP listener on port 5000 (reliable alternative to lsof/xargs)
+
+    echo "Terminating .NET processes (backup)..."
+    pkill -9 dotnet
+    pkill -9 -f MyKYWeb  # Specific backup for your app
+
+    echo "All done!"
+}
+
+# If no argument, kill all
 if [ -z "$1" ]; then
-  echo "Error: No task specified. Usage: $0 [dotnet|mykyweb|python|chrome|chromedriver|port5000]"
-  exit 1
+    kill_all
+    exit 0
 fi
 
+# Otherwise, handle individual cases
 case "$1" in
   "dotnet")
     echo "Terminating .NET processes..."
@@ -39,7 +64,7 @@ case "$1" in
     ;;
   "port5000")
     echo "Terminating processes on port 5000..."
-    lsof -ti:5000 | xargs -r kill -9
+    fuser -k 5000/tcp  # Updated for reliability
     echo "Done"
     ;;
   *)
