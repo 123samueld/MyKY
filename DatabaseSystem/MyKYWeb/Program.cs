@@ -1,5 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// Add this line to enable MVC controllers
+builder.Services.AddControllers();
+
 // Configure the server to listen on port 5000 for HTTP
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -7,6 +10,9 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var app = builder.Build();
+
+// Add this line to map controller routes
+app.MapControllers();
 
 // Enable static file serving from the Dashboard directory
 app.UseStaticFiles(new StaticFileOptions
@@ -28,7 +34,7 @@ app.UseStaticFiles(new StaticFileOptions
 app.MapGet("/", () => Results.Redirect("/dashboard/dashboard.html"));
 app.MapGet("/dashboard", () => Results.Redirect("/dashboard/dashboard.html"));
 
-// Kill application endpoint
+// Your existing minimal API endpoint (optional—remove if using only controller)
 app.MapPost("/kill-app", () =>
 {
     try

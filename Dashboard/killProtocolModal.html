@@ -1,0 +1,187 @@
+<!-- killProtocolModal.html -->
+<style>
+  /* Kill Protocol Modal Specific Styles */
+  #kill-protocol-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+    pointer-events: none;
+    z-index: 10000;
+  }
+  #kill-protocol-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Kill Protocol Modal Specific Styles */
+  #kill-protocol-modal-dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.01);
+  transform-origin: center center;
+  background: #000000;
+  border: none;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
+  height: 900px;
+  width: 720px; 
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  z-index: 10001;
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out;
+  position: relative;
+  }
+  #kill-protocol-modal-overlay.active #kill-protocol-modal-dialog {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  #kill-protocol-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #00ff00;
+    background: transparent;
+    position: relative;
+    z-index: 2;
+  }
+  #kill-protocol-modal-title {
+    margin: 0;
+    font-size: 2.5em;
+    text-align: center;
+    flex: 1;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 8px #00ff00;
+  }
+  #kill-protocol-modal-close {
+    background: none;
+    border: 1px solid #00ff00;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #00ff00;
+    padding: 5px 10px;
+    font-family: 'Courier New', monospace;
+    border-radius: 3px;
+  }
+  #kill-protocol-modal-close:hover {
+    background: #00ff00;
+    color: #000000;
+    text-shadow: none;
+  }
+  #kill-protocol-modal-content {
+    padding: 40px;
+    background: transparent;
+    color: #00ff00;
+    position: relative;
+    z-index: 2;
+  }
+  #kill-protocol-modal-content > p:first-child {
+    text-align: center;
+    font-weight: bold;
+    font-size: 24px;
+    margin-bottom: 25px;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 5px #00ff00;
+  }
+  /* Kill Protocol Status Styling */
+  .kill-protocol-status {
+    margin: 10px 0;
+  }
+  .status-line {
+    display: flex;
+    align-items: center;
+    margin: 12px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    color: #00ff00;
+  }
+  .status-checkbox {
+    margin-right: 16px;
+    transform: scale(1.5);
+    cursor: pointer;
+    accent-color: #00ff00;
+  }
+  .progress {
+    margin-left: auto;
+    font-weight: bold;
+    color: #00ff00;
+    text-shadow: 0 0 3px #00ff00;
+  }
+  
+/* TERMINATE Button Styling (with Red Glow) */
+#terminateButton {
+  display: block;
+  width: 100%;
+  margin-top: 30px;
+  padding: 20px 30px;
+  background: #ff0000;
+  color: white;
+  border: none;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  position: relative;
+  box-shadow: 0 0 15px #ff0000;  /* Red glow around the button */
+}
+
+#terminateButton::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  background: linear-gradient(45deg, #c0c0c0 0%, #a0a0a0 25%, #808080 50%, #a0a0a0 75%, #c0c0c0 100%);
+  z-index: -1;
+}
+
+</style>
+
+<div id="kill-protocol-modal-overlay">
+<div id="kill-protocol-modal-dialog">
+  <div id="kill-protocol-modal-header">
+    <h2 id="kill-protocol-modal-title">Kill Protocol Initiated</h2>
+    <button id="kill-protocol-modal-close">&times;</button>
+  </div>
+  <div id="kill-protocol-modal-content">
+    <div class="kill-protocol-status">
+      <p class="status-line" id="status-python">
+        <input type="checkbox" class="status-checkbox" id="checkbox-python" checked>
+        Terminating Python scraper processes <span class="progress" id="progress-python">[0%]</span>
+      </p>
+      <p class="status-line" id="status-chrome">
+        <input type="checkbox" class="status-checkbox" id="checkbox-chrome" checked>
+        Terminating Chrome/Chromium processes <span class="progress" id="progress-chrome">[0%]</span>
+      </p>
+      <p class="status-line" id="status-chromedriver">
+        <input type="checkbox" class="status-checkbox" id="checkbox-chromedriver" checked>
+        Terminating ChromeDriver processes <span class="progress" id="progress-chromedriver">[0%]</span>
+      </p>
+      <p class="status-line" id="status-port5000">
+        <input type="checkbox" class="status-checkbox" id="checkbox-port5000" checked>
+        Terminating processes on port 5000 <span class="progress" id="progress-port5000">[0%]</span>
+      </p>
+      <p class="status-line" id="status-dotnet">
+        <input type="checkbox" class="status-checkbox" id="checkbox-dotnet" checked>
+        Terminating .NET processes <span class="progress" id="progress-dotnet">[0%]</span>
+      </p>
+      <p class="status-line" id="status-mykyweb">
+        <input type="checkbox" class="status-checkbox" id="checkbox-mykyweb" checked> 
+        Terminating MyKYWeb processes <span class="progress" id="progress-mykyweb">[0%]</span>
+      </p>
+    </div>
+    <button id="terminateButton" type="button">TERMINATE</button>
+  </div>
+</div>
+</div>

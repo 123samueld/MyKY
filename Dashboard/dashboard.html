@@ -23,13 +23,13 @@
         margin: 20px 0 0 0;
         text-align: center;
         font-size: 2em;
-        z-index: 5; 
+        z-index: 5;
       }
       .map-container {
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-        top: -140px; 
+        top: -140px;
         max-width: 2200px;
         width: 100%;
         box-sizing: border-box;
@@ -67,171 +67,234 @@
       #control-panel button:hover {
         background: #e0e0e0;
       }
-
+      #kill-app-btn {
+        background-color: red; /* Red background */
+        color: black; /* Black text */
+        font-weight: bold; /* Bold text */
+      }
+      #kill-app-btn:hover {
+        background-color: darkred;
+      }
       #compass {
         position: absolute;
         top: 20px;
         right: 20px;
         width: 200px;
         height: 300px;
-        object-fit: cover; 
+        object-fit: cover;
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         z-index: 10;
       }
-
       #heraldic_shield {
         position: absolute;
         bottom: 20px;
         right: 20px;
         width: 200px;
         height: 300px;
-        object-fit: cover; 
+        object-fit: cover;
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         z-index: 10;
       }
 
-      /* Modal Styles */
-      .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.9);
-        opacity: 0;
-        transition: opacity 0.4s ease-out;
-        pointer-events: none;
-        z-index: 1000;
-      }
-      .modal-overlay.active {
-        opacity: 1;
-        pointer-events: auto;
-      }
-      .modal-dialog {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) scale(0.01);
-        transform-origin: center center;
-        background: linear-gradient(145deg, rgba(240, 240, 240, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
-        border: 3px solid;
-        border-image: linear-gradient(to right, #A9A9A9, #C0C0C0, #A9A9A9) 1;
-        border-radius: 8px;
-        padding: 0;
-        box-shadow: 0 4px 15px rgba(169, 169, 169, 0.15);
-        width: 80vw;
-        height: 80vh;
-        max-width: 80vw;
-        max-height: 80vh;
-        overflow-y: auto;
-        z-index: 1001;
-        opacity: 0;
-        transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out;
-      }
-      .modal-overlay.active .modal-dialog {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-      }
-      .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 20px;
-        border-bottom: 1px solid #ddd;
-      }
-      .modal-title {
-        margin: 0;
-        font-size: 1.5em;
-        text-align: center;
-        flex: 1;
-      }
-      .modal-close {
-        background: none;
-        border: none;
-        font-size: 1.5em;
-        cursor: pointer;
-        color: #666;
-        padding: 0 10px;
-      }
-      .modal-close:hover {
-        color: #000;
-      }
-      .modal-content {
-        padding: 20px;
-      }
     </style>
     <script src="mapdata.js"></script>
     <script src="countymap.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        // Modal functionality
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modalClose = document.getElementById('modal-close');
-        const modalTitle = document.getElementById('modal-title');
-        const modalContent = document.getElementById('modal-content');
+        // Function to load external modal HTML
+        function loadModalContent(url, callback) {
+          fetch(url)
+            .then(response => response.text())
+            .then(html => {
+              const modalContainer = document.createElement('div');
+              modalContainer.innerHTML = html;
+              document.body.appendChild(modalContainer);
     
-        // Function to open modal
-        window.openModal = function(title, content) {
-          modalTitle.textContent = title;
-          modalContent.innerHTML = content || '<p>Generic modal content goes here.</p>';
-          modalOverlay.classList.add('active');
-        };
-    
-        // Close modal functions
-        function closeModal() {
-          modalOverlay.classList.remove('active');
+              // Call the callback function after the modal content has been added to the DOM
+              if (callback) callback(modalContainer);
+            })
+            .catch(error => console.error('Error loading modal content:', error));
         }
     
-        modalClose.addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', function(e) {
-          if (e.target === modalOverlay) {
-            closeModal();
+        // Kill Protocol Modal functionality
+        const openKillProtocolModal = function(title, content) {
+          const modalOverlay = document.getElementById('kill-protocol-modal-overlay');
+          const modalTitle = document.getElementById('kill-protocol-modal-title');
+          
+          if (modalOverlay) {
+            modalTitle.textContent = title;
+            // Only update content if provided, otherwise keep existing content from killProtocolModal.html
+            if (content) {
+              const modalContent = document.getElementById('kill-protocol-modal-content');
+              modalContent.innerHTML = content;
+            }
+            modalOverlay.classList.add('active');
           }
-        });
+        };
     
-        // Optional: Close on Escape key
-        document.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
-            closeModal();
+        // Close kill protocol modal function
+        const closeKillProtocolModal = function() {
+          const modalOverlay = document.getElementById('kill-protocol-modal-overlay');
+          if (modalOverlay) {
+            modalOverlay.classList.remove('active');
           }
-        });
+        };
     
-        // Attach click handlers to control panel buttons
-        const controlButtons = document.querySelectorAll('#control-panel button');
-        controlButtons.forEach(button => {
-          button.addEventListener('click', function() {
-            openModal(this.textContent, `<p>Content for "${this.textContent}".</p>`);
+        // Kill Protocol Button Functionality
+        document.getElementById('kill-app-btn').addEventListener('click', function() {
+          // Load the modal content dynamically
+          loadModalContent('killProtocolModal.html', function(modalContainer) {
+            // Now that the modal is loaded, attach event listeners
+            const modalClose = modalContainer.querySelector('#kill-protocol-modal-close');
+            modalClose.addEventListener('click', closeKillProtocolModal);
+    
+            const modalOverlay = modalContainer.querySelector('#kill-protocol-modal-overlay');
+            modalOverlay.addEventListener('click', function(e) {
+              if (e.target === modalOverlay) {
+                closeKillProtocolModal();
+              }
+            });
+    
+          // Attach the terminate button listener here, after loading content
+          const terminateButton = document.getElementById('terminateButton');
+          if (terminateButton) {
+            console.log('Terminate button found, attaching listener');
+
+            terminateButton.addEventListener('click', async () => {
+              console.log('Terminate button clicked! Starting POST to /Kill');
+
+              const button = terminateButton;
+
+              button.disabled = true;
+              button.textContent = 'TERMINATE';
+
+              // Sequence of status IDs in termination order
+              const statusOrder = [
+                { checkbox: 'checkbox-python', progress: 'progress-python', textId: 'status-python' },
+                { checkbox: 'checkbox-chrome', progress: 'progress-chrome', textId: 'status-chrome' },
+                { checkbox: 'checkbox-chromedriver', progress: 'progress-chromedriver', textId: 'status-chromedriver' },
+                { checkbox: 'checkbox-port5000', progress: 'progress-port5000', textId: 'status-port5000' },
+                { checkbox: 'checkbox-dotnet', progress: 'progress-dotnet', textId: 'status-dotnet' },
+                { checkbox: 'checkbox-mykyweb', progress: 'progress-mykyweb', textId: 'status-mykyweb' }
+              ];
+
+          // Animate each status sequentially: start with delay, then incremental progress over 2s (200ms per 10% step, 10 steps)
+          statusOrder.forEach((status, index) => {
+            setTimeout(() => {
+              const checkbox = document.getElementById(status.checkbox);
+              const progressSpan = document.getElementById(status.progress);
+              const statusP = document.getElementById(status.textId);
+
+              if (checkbox && !checkbox.checked) {
+                checkbox.checked = true;
+              }
+
+              if (progressSpan && statusP) {
+                let currentPercent = 0;
+                let dots = '';
+
+                // Incremental animation loop for this status
+                const interval = setInterval(() => {
+                  currentPercent += 10;  // 10% increments
+                  dots += '.';  // 1 dot per step
+
+                  progressSpan.textContent = `[${currentPercent}%]`;
+                  // Insert dots before the span
+                  const textNode = statusP.childNodes[2];  // Assuming structure: input, text, span
+                  if (textNode) {
+                    textNode.textContent = textNode.textContent.replace(/\.{3,}$/, '') + dots;  // Append dots, avoid duplicates
+                  }
+
+                  if (currentPercent >= 100) {
+                    clearInterval(interval);
+                    progressSpan.textContent = '[100%]';
+
+                    // Play sound effect when reaching 100%
+                    const audio = new Audio('../Resources/Audio/printDataLine.mp3');
+                    audio.play().catch(error => console.log('Audio play failed:', error));
+                  }
+                }, 200);  // 200ms per increment (10 steps = 2s total per status)
+              }
+            }, index * 750);  // Start each status 750ms after previous
           });
+
+              // Delay the POST call by 4200ms (starts during animation)
+              setTimeout(async () => {
+                try {
+                  const response = await fetch('/Kill', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                  });
+
+                  console.log('Response status:', response.status);
+
+                  if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`Server error (${response.status}): ${error}`);
+                  }
+
+                  const data = await response.json();
+
+                  // Optional: Close modal after success
+                  setTimeout(closeKillProtocolModal, 4200);
+                } catch (error) {
+                  console.error('Fetch error:', error);
+
+                  // Handle connection reset (server killed itself) by closing tab
+                  if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    console.log('Server shutdown detected; closing tab');
+
+                    // Close the tab (works if dashboard opened via script/button; else blanks it)
+                    setTimeout(() => {
+                      if (window.close) {
+                        window.close();
+                      } else {
+                        window.location.href = 'about:blank';
+                      }
+                    }, 1000);
+                  }
+                } finally {
+                  button.disabled = false;
+                  button.textContent = 'TERMINATE';
+                }
+              }, 4200);
+            });
+          } else {
+            console.error('Terminate button (#terminateButton) not found in modal');
+          }
+            
+            // Open the modal after it is fully loaded (don't overwrite content)
+            openKillProtocolModal('Kill Protocol Initiated');
+          });
+        });
+    
+        // Optional: Close kill protocol modal on Escape key
+        document.addEventListener('keydown', function(e) {
+          const modalOverlay = document.getElementById('kill-protocol-modal-overlay');
+          if (e.key === 'Escape' && modalOverlay && modalOverlay.classList.contains('active')) {
+            closeKillProtocolModal();
+          }
         });
       });
     </script>
-    </head>
-    <body>
-      <div id="control-panel">
-        <h2>Control Panel</h2>
-        <button>Sort Counties</button>
-        <button>Sort Properties</button>
-        <button>Scraper Dashboard</button>
-      </div>
+  </head>
+  <body>
+    <div id="control-panel">
+      <h2>Control Panel</h2>
+      <button>Sort Counties</button>
+      <button>Sort Properties</button>
+      <button>Scraper Dashboard</button>
+      <button id="kill-app-btn">Kill Protocol</button>
+    </div>
     <h1>MyKY</h1>
     <div class="map-container">
       <div id="map"></div>
     </div>
     <img id="compass" alt="Top right image" src="../resources/Imgs/compass.png"/>
     <img id="heraldic_shield" alt="Heraldic Shield of MyKY" src="../resources/Imgs/heraldic_shield.png"/>
-    <!-- Modal Structure -->
-    <div id="modal-overlay" class="modal-overlay">
-      <div class="modal-dialog">
-        <div class="modal-header">
-          <h2 class="modal-title" id="modal-title">Modal Title</h2>
-          <button class="modal-close" id="modal-close">&times;</button>
-        </div>
-        <div class="modal-content" id="modal-content">
-          <!-- Dynamic content here -->
-        </div>
-      </div>
-    </div>
+    <!-- Modal Structure will be loaded dynamically -->
   </body>
 </html>

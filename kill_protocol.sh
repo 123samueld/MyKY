@@ -1,35 +1,76 @@
 #!/bin/bash
 
 # MyKY Application Kill Script
-# This script terminates all processes related to the MyKY application
+# This script terminates all processes related to the MyKY application when no argument is provided,
+# or specific ones if an argument is given.
 
-echo "🔴 MyKY Kill Protocol Initiated..."
+# Function to kill everything (clients first, server last for reliability)
+kill_all() {
+    echo "Terminating Python scraper processes..."
+    pkill -9 -f "MainScraper.py"
+    pkill -9 -f "SeleniumAndWebDriverTest.py"
 
-# Kill all dotnet processes (ASP.NET applications)
-echo "Terminating .NET processes..."
-pkill -9 dotnet
+    echo "Terminating Chrome/Chromium processes..."
+    pkill -9 chrome
+    pkill -9 chromium-browser
 
-# Kill any MyKYWeb processes specifically
-echo "Terminating MyKYWeb processes..."
-pkill -9 -f MyKYWeb
+    echo "Terminating ChromeDriver processes..."
+    pkill -9 chromedriver
 
-# Kill any Python scraper processes
-echo "Terminating Python scraper processes..."
-pkill -9 -f "MainScraper.py"
-pkill -9 -f "SeleniumAndWebDriverTest.py"
+    echo "Terminating processes on port 5000..."
+    fuser -k 5000/tcp  # Targeted kill of TCP listener on port 5000 (reliable alternative to lsof/xargs)
 
-# Kill any Chrome/Chromium processes that might be running from scraping
-echo "Terminating Chrome/Chromium processes..."
-pkill -9 chrome
-pkill -9 chromium-browser
+    echo "Terminating .NET processes (backup)..."
+    pkill -9 dotnet
+    pkill -9 -f MyKYWeb  # Specific backup for your app
 
-# Kill any chromedriver processes
-echo "Terminating ChromeDriver processes..."
-pkill -9 chromedriver
+    echo "All done!"
+}
 
-# Optional: Kill any processes running on port 5000 (ASP.NET default)
-echo "Terminating processes on port 5000..."
-lsof -ti:5000 | xargs -r kill -9
+# If no argument, kill all
+if [ -z "$1" ]; then
+    kill_all
+    exit 0
+fi
 
-echo "✅ MyKY Kill Protocol Complete"
-echo "All related processes have been terminated."
+# Otherwise, handle individual cases
+case "$1" in
+  "dotnet")
+    echo "Terminating .NET processes..."
+    pkill -9 dotnet
+    echo "Done"
+    ;;
+  "mykyweb")
+    echo "Terminating MyKYWeb processes..."
+    pkill -9 -f MyKYWeb
+    echo "Done"
+    ;;
+  "python")
+    echo "Terminating Python scraper processes..."
+    pkill -9 -f "MainScraper.py"
+    pkill -9 -f "SeleniumAndWebDriverTest.py"
+    echo "Done"
+    ;;
+  "chrome")
+    echo "Terminating Chrome/Chromium processes..."
+    pkill -9 chrome
+    pkill -9 chromium-browser
+    echo "Done"
+    ;;
+  "chromedriver")
+    echo "Terminating ChromeDriver processes..."
+    pkill -9 chromedriver
+    echo "Done"
+    ;;
+  "port5000")
+    echo "Terminating processes on port 5000..."
+    fuser -k 5000/tcp  # Updated for reliability
+    echo "Done"
+    ;;
+  *)
+    echo "Error: Invalid task '$1'. Valid options: dotnet, mykyweb, python, chrome, chromedriver, port5000"
+    exit 1
+    ;;
+esac
+
+exit 0
