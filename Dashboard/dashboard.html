@@ -99,6 +99,12 @@
       }
 
     </style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MyKY Dashboard</title>
+    <!-- Add any necessary CSS links or styles here -->
     <script src="mapdata.js"></script>
     <script src="countymap.js"></script>
     <script>
@@ -118,109 +124,135 @@
             .catch(error => console.error('Error loading modal content:', error));
         }
     
-        // Kill Protocol Modal functionality
-        const openKillProtocolModal = function(title, content) {
-          const modalOverlay = document.getElementById('kill-protocol-modal-overlay');
-          const modalTitle = document.getElementById('kill-protocol-modal-title');
-          
-          if (modalOverlay) {
-            modalTitle.textContent = title;
-            // Only update content if provided, otherwise keep existing content from killProtocolModal.html
-            if (content) {
-              const modalContent = document.getElementById('kill-protocol-modal-content');
-              modalContent.innerHTML = content;
-            }
-            modalOverlay.classList.add('active');
-          }
-        };
+        // General function to set up modal handling for a button
+        function setupModal(buttonId, modalUrl, prefix, title, content = null, additionalCallback = null) {
+          document.getElementById(buttonId).addEventListener('click', function() {
+            // Load the modal content dynamically
+            loadModalContent(modalUrl, function(modalContainer) {
+              // Open modal function
+              const openModal = function(title, content) {
+                const modalOverlay = document.getElementById(`${prefix}modal-overlay`);
+                const modalTitle = document.getElementById(`${prefix}modal-title`);
+                
+                if (modalOverlay) {
+                  modalTitle.textContent = title;
+                  // Only update content if provided, otherwise keep existing content from HTML
+                  if (content) {
+                    const modalContent = document.getElementById(`${prefix}modal-content`);
+                    modalContent.innerHTML = content;
+                  }
+                  modalOverlay.classList.add('active');
+                }
+              };
     
-        // Close kill protocol modal function
-        const closeKillProtocolModal = function() {
-          const modalOverlay = document.getElementById('kill-protocol-modal-overlay');
-          if (modalOverlay) {
-            modalOverlay.classList.remove('active');
-          }
-        };
+              // Close modal function
+              const closeModal = function() {
+                const modalOverlay = document.getElementById(`${prefix}modal-overlay`);
+                if (modalOverlay) {
+                  modalOverlay.classList.remove('active');
+                }
+              };
     
-        // Kill Protocol Button Functionality
-        document.getElementById('kill-app-btn').addEventListener('click', function() {
-          // Load the modal content dynamically
-          loadModalContent('killProtocolModal.html', function(modalContainer) {
-            // Now that the modal is loaded, attach event listeners
-            const modalClose = modalContainer.querySelector('#kill-protocol-modal-close');
-            modalClose.addEventListener('click', closeKillProtocolModal);
-    
-            const modalOverlay = modalContainer.querySelector('#kill-protocol-modal-overlay');
-            modalOverlay.addEventListener('click', function(e) {
-              if (e.target === modalOverlay) {
-                closeKillProtocolModal();
+              // Attach event listeners for close
+              const modalClose = modalContainer.querySelector(`#${prefix}modal-close`);
+              if (modalClose) {
+                modalClose.addEventListener('click', closeModal);
               }
-            });
     
-          // Attach the terminate button listener here, after loading content
+              const modalOverlay = modalContainer.querySelector(`#${prefix}modal-overlay`);
+              if (modalOverlay) {
+                modalOverlay.addEventListener('click', function(e) {
+                  if (e.target === modalOverlay) {
+                    closeModal();
+                  }
+                });
+              }
+    
+              // Run additional callback if provided (e.g., for Kill Protocol's terminate button)
+              if (additionalCallback) {
+                additionalCallback(modalContainer, closeModal); // Pass closeModal function
+              }
+    
+              // Open the modal after it is fully loaded
+              openModal(title, content);
+            });
+          });
+        }
+    
+        // Setup for other modals
+        setupModal('sort-counties-btn', 'sortCountiesModal.html', 'sort-counties-', 'Sort Counties');
+        setupModal('sort-properties-btn', 'sortPropertiesModal.html', 'sort-properties-', 'Sort Properties');
+        setupModal('scraper-dashboard-btn', 'scraperDashboardModal.html', 'scraper-dashboard-', 'Scraper Dashboard');
+        //setupModal('scraper-dashboard-btn', 'scraperDashboardModal.html', 'scraper-dashboard-', 'Scraper Dashboard');
+        
+        // Additional setup for Kill Protocol's terminate button and ESC handling
+        const killAdditionalSetup = function(modalContainer, closeKillModal) {
+          // Store the close function for Kill Protocol
+          window.killProtocolClose = closeKillModal;
+    
           const terminateButton = document.getElementById('terminateButton');
           if (terminateButton) {
             console.log('Terminate button found, attaching listener');
-
+    
             terminateButton.addEventListener('click', async () => {
               console.log('Terminate button clicked! Starting POST to /Kill');
-
+    
               const button = terminateButton;
-
+    
               button.disabled = true;
               button.textContent = 'TERMINATE';
-
+    
               // Sequence of status IDs in termination order
               const statusOrder = [
                 { checkbox: 'checkbox-python', progress: 'progress-python', textId: 'status-python' },
                 { checkbox: 'checkbox-chrome', progress: 'progress-chrome', textId: 'status-chrome' },
                 { checkbox: 'checkbox-chromedriver', progress: 'progress-chromedriver', textId: 'status-chromedriver' },
-                { checkbox: 'checkbox-port5000', progress: 'progress-port5000', textId: 'status-port5000' },
+                { checkbox: 'checkbox-port5000', progress: 'progress-port5000', textId: 'status-port5000' },                
+                { checkbox: 'checkbox-port5001', progress: 'progress-port5001', textId: 'status-port5001' },
                 { checkbox: 'checkbox-dotnet', progress: 'progress-dotnet', textId: 'status-dotnet' },
                 { checkbox: 'checkbox-mykyweb', progress: 'progress-mykyweb', textId: 'status-mykyweb' }
               ];
+    
+              // Animate each status sequentially
+              statusOrder.forEach((status, index) => {
+                setTimeout(() => {
+                  console.log(status);  // Debug: Ensure this is logging correctly for port5001
 
-          // Animate each status sequentially: start with delay, then incremental progress over 2s (200ms per 10% step, 10 steps)
-          statusOrder.forEach((status, index) => {
-            setTimeout(() => {
-              const checkbox = document.getElementById(status.checkbox);
-              const progressSpan = document.getElementById(status.progress);
-              const statusP = document.getElementById(status.textId);
-
-              if (checkbox && !checkbox.checked) {
-                checkbox.checked = true;
-              }
-
-              if (progressSpan && statusP) {
-                let currentPercent = 0;
-                let dots = '';
-
-                // Incremental animation loop for this status
-                const interval = setInterval(() => {
-                  currentPercent += 10;  // 10% increments
-                  dots += '.';  // 1 dot per step
-
-                  progressSpan.textContent = `[${currentPercent}%]`;
-                  // Insert dots before the span
-                  const textNode = statusP.childNodes[2];  // Assuming structure: input, text, span
-                  if (textNode) {
-                    textNode.textContent = textNode.textContent.replace(/\.{3,}$/, '') + dots;  // Append dots, avoid duplicates
+                  const checkbox = document.getElementById(status.checkbox);
+                  const progressSpan = document.getElementById(status.progress);
+                  const statusP = document.getElementById(status.textId);
+    
+                  if (checkbox && !checkbox.checked) {
+                    checkbox.checked = true;
                   }
-
-                  if (currentPercent >= 100) {
-                    clearInterval(interval);
-                    progressSpan.textContent = '[100%]';
-
-                    // Play sound effect when reaching 100%
-                    const audio = new Audio('../Resources/Audio/printDataLine.mp3');
-                    audio.play().catch(error => console.log('Audio play failed:', error));
+    
+                  if (progressSpan && statusP) {
+                    let currentPercent = 0;
+                    let dots = '';
+    
+                    const interval = setInterval(() => {
+                      currentPercent += 10;
+                      dots += '.';
+    
+                      progressSpan.textContent = `[${currentPercent}%]`;
+                      const textNode = statusP.childNodes[2];
+                      if (textNode) {
+                        textNode.textContent = textNode.textContent.replace(/\.{3,}$/, '') + dots;
+                      }
+    
+                      if (currentPercent >= 100) {
+                        clearInterval(interval);
+                        progressSpan.textContent = '[100%]';
+    
+                        const audio = new Audio('../Resources/Audio/printDataLine.mp3');
+                        audio.play().catch(error => console.log('Audio play failed:', error));
+                      }
+                    }, 200);
                   }
-                }, 200);  // 200ms per increment (10 steps = 2s total per status)
-              }
-            }, index * 750);  // Start each status 750ms after previous
-          });
-
-              // Delay the POST call by 4200ms (starts during animation)
+                }, index * 750);
+              });
+    
+              // Delay the POST call by 4200ms
               setTimeout(async () => {
                 try {
                   const response = await fetch('/Kill', {
@@ -228,26 +260,29 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({})
                   });
-
+    
                   console.log('Response status:', response.status);
-
+    
                   if (!response.ok) {
                     const error = await response.text();
                     throw new Error(`Server error (${response.status}): ${error}`);
                   }
-
+    
                   const data = await response.json();
-
-                  // Optional: Close modal after success
-                  setTimeout(closeKillProtocolModal, 4200);
+    
+                  // Use the stored close function
+                  setTimeout(() => {
+                    if (window.killProtocolClose) {
+                      window.killProtocolClose();
+                    }
+                  },
+                  12,600); 
+                  //4200);
                 } catch (error) {
                   console.error('Fetch error:', error);
-
-                  // Handle connection reset (server killed itself) by closing tab
+    
                   if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
                     console.log('Server shutdown detected; closing tab');
-
-                    // Close the tab (works if dashboard opened via script/button; else blanks it)
                     setTimeout(() => {
                       if (window.close) {
                         window.close();
@@ -265,17 +300,30 @@
           } else {
             console.error('Terminate button (#terminateButton) not found in modal');
           }
-            
-            // Open the modal after it is fully loaded (don't overwrite content)
-            openKillProtocolModal('Kill Protocol Initiated');
-          });
-        });
+        };
     
-        // Optional: Close kill protocol modal on Escape key
+        // Setup for Kill Protocol Modal (with additional terminate logic)
+        setupModal('kill-app-btn', 'killProtocolModal.html', 'kill-protocol-', 'Kill Protocol Initiated', null, killAdditionalSetup);
+    
+        // Enhanced Escape key handler that works for ALL modals including Kill Protocol
         document.addEventListener('keydown', function(e) {
-          const modalOverlay = document.getElementById('kill-protocol-modal-overlay');
-          if (e.key === 'Escape' && modalOverlay && modalOverlay.classList.contains('active')) {
-            closeKillProtocolModal();
+          if (e.key === 'Escape') {
+            // Check for any active modals using the general class selector
+            const activeOverlays = document.querySelectorAll('[id$="-modal-overlay"].active');
+            activeOverlays.forEach(overlay => {
+              overlay.classList.remove('active');
+            });
+    
+            // Specifically handle Kill Protocol modal
+            const killOverlay = document.getElementById('kill-protocol-modal-overlay');
+            if (killOverlay && killOverlay.classList.contains('active')) {
+              killOverlay.classList.remove('active');
+            }
+    
+            // Use stored close function if available
+            if (window.killProtocolClose) {
+              window.killProtocolClose();
+            }
           }
         });
       });
@@ -284,9 +332,9 @@
   <body>
     <div id="control-panel">
       <h2>Control Panel</h2>
-      <button>Sort Counties</button>
-      <button>Sort Properties</button>
-      <button>Scraper Dashboard</button>
+      <button id="sort-counties-btn">Sort Counties</button>
+      <button id="sort-properties-btn">Sort Properties</button>
+      <button id="scraper-dashboard-btn">Scraper Dashboard</button>
       <button id="kill-app-btn">Kill Protocol</button>
     </div>
     <h1>MyKY</h1>
@@ -295,6 +343,6 @@
     </div>
     <img id="compass" alt="Top right image" src="../resources/Imgs/compass.png"/>
     <img id="heraldic_shield" alt="Heraldic Shield of MyKY" src="../resources/Imgs/heraldic_shield.png"/>
-    <!-- Modal Structure will be loaded dynamically -->
+    <!-- Modal Structures will be loaded dynamically -->
   </body>
 </html>

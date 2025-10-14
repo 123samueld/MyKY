@@ -7,6 +7,7 @@ There are a few things you'll need to download and install for this app to work.
 * ChromeDriver
 * Python 3
 * Selenium
+* Flask
 * JQ
 * Asp.NET
 ### Actions
@@ -82,6 +83,22 @@ To test that Selenium is using the ChromeDriver correctly, first in the terminal
 
  If Selenium and the ChromeDriver and both correctly downloaded and installed, there will be a brief pause, the Chrome Browser will open with a message in the headder saying it's being controlled by automated software, it will go to google.com then the browser will close. Then a message will appear in the terminal saying "Google". This confirms Selenium and the ChromeDriver are working correctly. 
 
+### How to Download/Install Flask
+
+Flask is needed so the frontend dashboard can "talk" to the backend Python code which handles scraping. To install, in the terminal, navigate to the project root dir if not already there. Then enter this command:
+
+* pip install -r Utilities/requirements.txt
+
+To test that was installed correctly enter this command in the terminal to open a Python terminal
+
+* python3
+
+Then enter:
+
+* import flask
+* print(flask.__version__)
+
+That should return the version of Flask installed confirming it has been installed correctly.
 
 ### How to Download/Install JQ
 JQ is so launch.sh can read the a file with all the pathing to the files this app needs. This is a design choice that makes it much easier to update and refactor code, over all it's an excellent design but adds a bit of extra setup with JQ. 

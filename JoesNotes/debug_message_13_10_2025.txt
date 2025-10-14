@@ -1,0 +1,263 @@
+print(selenium.version)
+is wrong it needs to be
+
+print(selenium.__version__)
+
+
+ran into problems at the dotnet part 
+
+vboxuser@myky:~$ sudo apt-get install aspnetcore-runtime-6.0
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+E: Unable to locate package aspnetcore-runtime-6.0
+E: Couldn't find any package by glob 'aspnetcore-runtime-6.0'
+E: Couldn't find any package by regex 'aspnetcore-runtime-6.0'
+
+
+running dotnet --version gave me this:
+
+vboxuser@myky:~$ dotnet --version
+
+Command 'dotnet' not found, but can be installed with:
+
+sudo snap install dotnet      # version 9.0.9, or
+sudo snap install dotnet-sdk  # version 8.0.407
+
+See 'snap info <snapname>' for additional versions.
+
+
+
+
+
+updated the certificates and https transports with 
+
+sudo apt-get install -y apt-transport-https ca-certificates
+
+then updated
+
+ran this:
+
+vboxuser@myky:~$ sudo apt-get install -y aspnetcore-runtime-6.0
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following package was automatically installed and is no longer required:
+  linux-modules-5.4.0-1002-oem
+Use 'sudo apt autoremove' to remove it.
+The following additional packages will be installed:
+  dotnet-host dotnet-hostfxr-6.0 dotnet-runtime-6.0 dotnet-runtime-deps-6.0
+The following NEW packages will be installed
+  aspnetcore-runtime-6.0 dotnet-host dotnet-hostfxr-6.0 dotnet-runtime-6.0
+  dotnet-runtime-deps-6.0
+0 to upgrade, 5 to newly install, 0 to remove and 748 not to upgrade.
+Need to get 29.2 MB of archives.
+After this operation, 91.1 MB of additional disk space will be used.
+Get:1 https://packages.microsoft.com/ubuntu/20.04/prod focal/main amd64 dotnet-host amd64 9.0.4-1 [36.7 kB]
+Get:2 https://packages.microsoft.com/ubuntu/20.04/prod focal/main amd64 dotnet-hostfxr-6.0 amd64 6.0.36-1 [144 kB]
+Get:3 https://packages.microsoft.com/ubuntu/20.04/prod focal/main amd64 dotnet-runtime-deps-6.0 amd64 6.0.36-1 [2,894 B]
+Get:4 https://packages.microsoft.com/ubuntu/20.04/prod focal/main amd64 dotnet-runtime-6.0 amd64 6.0.36-1 [22.3 MB]
+Get:5 https://packages.microsoft.com/ubuntu/20.04/prod focal/main amd64 aspnetcore-runtime-6.0 amd64 6.0.36-1 [6,628 kB]
+Fetched 29.2 MB in 4s (7,816 kB/s)                  
+Selecting previously unselected package dotnet-host.
+(Reading database ... 194417 files and directories currently installed.)
+Preparing to unpack .../dotnet-host_9.0.4-1_amd64.deb ...
+Unpacking dotnet-host (9.0.4-1) ...
+Selecting previously unselected package dotnet-hostfxr-6.0.
+Preparing to unpack .../dotnet-hostfxr-6.0_6.0.36-1_amd64.deb ...
+Unpacking dotnet-hostfxr-6.0 (6.0.36-1) ...
+Selecting previously unselected package dotnet-runtime-deps-6.0.
+Preparing to unpack .../dotnet-runtime-deps-6.0_6.0.36-1_amd64.deb ...
+Unpacking dotnet-runtime-deps-6.0 (6.0.36-1) ...
+Selecting previously unselected package dotnet-runtime-6.0.
+Preparing to unpack .../dotnet-runtime-6.0_6.0.36-1_amd64.deb ...
+Unpacking dotnet-runtime-6.0 (6.0.36-1) ...
+Selecting previously unselected package aspnetcore-runtime-6.0.
+Preparing to unpack .../aspnetcore-runtime-6.0_6.0.36-1_amd64.deb ...
+Unpacking aspnetcore-runtime-6.0 (6.0.36-1) ...
+Setting up dotnet-host (9.0.4-1) ...
+Setting up dotnet-runtime-deps-6.0 (6.0.36-1) ...
+Setting up dotnet-hostfxr-6.0 (6.0.36-1) ...
+Setting up dotnet-runtime-6.0 (6.0.36-1) ...
+Setting up aspnetcore-runtime-6.0 (6.0.36-1) ...
+
+but when i did the --version it still isnt working:
+
+vboxuser@myky:~$ dotnet --version
+The command could not be loaded, possibly because:
+  * You intended to execute a .NET application:
+      The application '--version' does not exist.
+  * You intended to execute a .NET SDK command:
+      No .NET SDKs were found.
+
+Download a .NET SDK:
+https://aka.ms/dotnet-download
+
+Learn about SDK resolution:
+https://aka.ms/dotnet/sdk-not-found
+
+
+ran sudo apt-get install dotnet-sdk-6.0
+now it shows me the correct version:
+
+vboxuser@myky:~$ dotnet --version
+6.0.428
+
+
+running ./launch.sh did work. it opens a domain cant be reached window in chrome and said this in terminal:
+
+vboxuser@myky:~/Desktop/MyKY-main$ ./launch.sh
+DEBUG: Current directory: /home/vboxuser/Desktop/MyKY-main
+DEBUG: SCRIPT_DIR=/home/vboxuser/Desktop/MyKY-main
+DEBUG: config_file=./Utilities/FilePathCompendium.json
+DEBUG: backend_dir=./DatabaseSystem/MyKYWeb
+DEBUG: csproj_path=/home/vboxuser/Desktop/MyKY-main/./DatabaseSystem/MyKYWeb/MyKYWeb.csproj
+DEBUG: dotnet version: 6.0.428
+DEBUG: Checking csproj existence: ls -l /home/vboxuser/Desktop/MyKY-main/./DatabaseSystem/MyKYWeb/MyKYWeb.csproj
+DEBUG: Checking for existing dotnet processes
+DEBUG: Cleaning project
+
+Welcome to .NET 6.0!
+---------------------
+SDK Version: 6.0.428
+
+Telemetry
+---------
+The .NET tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+
+----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only).
+Learn about HTTPS: https://aka.ms/dotnet-https
+----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+--------------------------------------------------------------------------------------
+MSBuild version 17.3.4+a400405ba for .NET
+Build started 13/10/2025 23:38:10.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.52
+DEBUG: Building project
+MSBuild version 17.3.4+a400405ba for .NET
+  Determining projects to restore...
+  Restored /home/vboxuser/Desktop/MyKY-main/DatabaseSystem/MyKYWeb/MyKYWeb.csproj (in 131 ms).
+  MyKYWeb -> /home/vboxuser/Desktop/MyKY-main/DatabaseSystem/MyKYWeb/bin/Debug/net6.0/MyKYWeb.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.78
+DEBUG: Running command: dotnet run --project "/home/vboxuser/Desktop/MyKY-main/./DatabaseSystem/MyKYWeb/MyKYWeb.csproj"
+Building...
+Unhandled exception. System.IO.DirectoryNotFoundException: /home/samuel/Desktop/MyKY/Dashboard/
+   at Microsoft.Extensions.FileProviders.PhysicalFileProvider..ctor(String root, ExclusionFilters filters)
+   at Microsoft.Extensions.FileProviders.PhysicalFileProvider..ctor(String root)
+   at Program.<Main>$(String[] args) in /home/vboxuser/Desktop/MyKY-main/DatabaseSystem/MyKYWeb/Program.cs:line 18
+vboxuser@myky:~/Desktop/MyKY-main$ Fontconfig error: Cannot load default config file: No such file: (null)
+Created TensorFlow Lite XNNPACK delegate for CPU.
+[17902:17930:1013/233820.930159:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[17902:17930:1013/233847.568894:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[17902:17930:1013/233942.668185:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[17902:17902:1013/233958.985393:ERROR:ui/compositor/compositor_animation_observer.cc:65] CompositorAnimationObserver is active for too long (90.6662s) location=Button@ui/views/controls/button/button.cc:668
+^C
+
+
+its failing to find the directory at /home/samuel/Desktop/MyKY/Dashboard/ 
+
+changed the program.cs file to this:
+
+
+using Microsoft.Extensions.FileProviders;
+using System.IO;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(5000);
+});
+
+var app = builder.Build();
+
+app.MapControllers();
+
+var currentDir = Directory.GetCurrentDirectory();
+var projectRoot = Path.GetFullPath(Path.Combine(currentDir, "..", "..", "..")); 
+
+var dashboardPath = Path.Combine(projectRoot, "Dashboard");
+var resourcesPath = Path.Combine(projectRoot, "Resources");
+var killScriptPath = Path.Combine(projectRoot, "kill_protocol.sh");
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider("/home/vboxuser/Desktop/MyKY-main/Dashboard"),
+    RequestPath = "/dashboard"
+});
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider("/home/vboxuser/Desktop/MyKY-main/Resources"),
+    RequestPath = "/resources"
+});
+
+app.MapGet("/", () => Results.Redirect("/dashboard/dashboard.html"));
+app.MapGet("/dashboard", () => Results.Redirect("/dashboard/dashboard.html"));
+
+app.MapPost("/kill-app", () =>
+{
+    try
+    {
+        var process = new System.Diagnostics.Process
+        {
+            StartInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "bash",
+                Arguments = killScriptPath,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        process.WaitForExit();
+
+        return Results.Ok("Kill signal sent successfully");
+    }
+    catch (System.Exception ex)
+    {
+        return Results.Problem($"Failed to execute kill script: {ex.Message}");
+    }
+});
+
+app.Run();
+
+
+app now opens when i run launch.sh !!!
+
+when running killall gnome-software i get:
+
+had to change the nano file to:
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=MyKY
+Comment=Launches the local real estate scanner and opens the dashboard
+Exec=/home/vboxuser/Desktop/MyKY-main/launch.sh
+Icon=/home/vboxuser/Desktop/MyKY-main/Resources/Imgs/AppLaunchIcon.png
+Terminal=false
+Categories=Utility;
+
+now fully working i think
+ 

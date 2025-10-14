@@ -1,5 +1,6 @@
 {
-    "backendDirectory": "./DatabaseSystem/MyKYWeb",
+    "backendDirectory": "./DatabaseSystem/MyKYWeb/",
+    "scraperDirectory": "./ScrapeSystem/",
     "utilities": "./Utilities/",
     "imageDirectory": "./Resources/Imgs"
 }

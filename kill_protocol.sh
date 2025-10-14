@@ -18,11 +18,14 @@ kill_all() {
     pkill -9 chromedriver
 
     echo "Terminating processes on port 5000..."
-    fuser -k 5000/tcp  # Targeted kill of TCP listener on port 5000 (reliable alternative to lsof/xargs)
+    fuser -k 5000/tcp  
 
+    echo "Terminating processes on port 5001..."
+    fuser -k 5001/tcp  
+    
     echo "Terminating .NET processes (backup)..."
     pkill -9 dotnet
-    pkill -9 -f MyKYWeb  # Specific backup for your app
+    pkill -9 -f MyKYWeb  
 
     echo "All done!"
 }
@@ -64,11 +67,16 @@ case "$1" in
     ;;
   "port5000")
     echo "Terminating processes on port 5000..."
-    fuser -k 5000/tcp  # Updated for reliability
+    fuser -k 5000/tcp  
+    echo "Done"
+    ;;
+  "port5001")
+    echo "Terminating processes on port 5001..."
+    fuser -k 5001/tcp  
     echo "Done"
     ;;
   *)
-    echo "Error: Invalid task '$1'. Valid options: dotnet, mykyweb, python, chrome, chromedriver, port5000"
+    echo "Error: Invalid task '$1'. Valid options: dotnet, mykyweb, python, chrome, chromedriver, port5000, port5001"
     exit 1
     ;;
 esac
