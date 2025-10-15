@@ -71,7 +71,7 @@ if [ -f "$kill_script" ]; then
     if [ -x "$kill_script" ]; then
         echo "✅ Kill script is executable"
     else
-        echo "⚠️(Expected) Kill script exists but is not executable (run: chmod +x kill_protocol.sh)"
+        echo "⚠️ (Expected) Kill script exists but is not executable (run: chmod +x kill_protocol.sh)"
     fi
 else
     echo "❌ Kill script missing: $kill_script"
@@ -84,7 +84,7 @@ if [ -f "$launch_script" ]; then
     if [ -x "$launch_script" ]; then
         echo "✅ Launch script is executable"
     else
-        echo "⚠️(Expected) Launch script exists but is not executable (run: chmod +x launch.sh)"
+        echo "⚠️ (Expected) Launch script exists but is not executable (run: chmod +x launch.sh)"
     fi
 else
     echo "❌ Launch script missing: $launch_script"

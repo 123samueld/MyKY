@@ -3,6 +3,7 @@
 There are a few things you'll need to download and install for this app to work. Then there a few things you'll need to do to get the app running for the first time. Here is a quick list of downloads and actions then their description below:
 
 ### Downloaods
+* This app
 * Google Chrome
 * ChromeDriver
 * Python 3
@@ -17,6 +18,9 @@ There are a few things you'll need to download and install for this app to work.
 * Create desktop quick launch icon
 
 ## Downloads/Installs
+
+### This app
+Get this app from Github, preferably clone it to your Desktop. 
 
 ### How to Download/Install Google Chrome
 Unfortunately the scraper depends on the Google Chrome Browser, other browsers are not an option. You will need to download Chrome, get the latest version from here: 
