@@ -1,4 +1,14 @@
+using System;
+using System.IO;
+using System.Text.Json;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.FileProviders;
+
+// Get RootPath from shared configuration
+string updateThis_rootPath = AppConfig.RootPath;
+
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add this line to enable MVC controllers
 builder.Services.AddControllers();
@@ -11,14 +21,11 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 
-// Add this line to map controller routes
-app.MapControllers();
-
 // Enable static file serving from the Dashboard directory
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
-        "/home/samuel/Desktop/MyKY/Dashboard"),
+        updateThis_rootPath+"/Desktop/MyKY/Dashboard"),
     RequestPath = "/dashboard"
 });
 
@@ -26,7 +33,7 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
-        "/home/samuel/Desktop/MyKY/Resources"),
+        updateThis_rootPath+"/Desktop/MyKY/Resources"),
     RequestPath = "/resources"
 });
 
@@ -34,13 +41,16 @@ app.UseStaticFiles(new StaticFileOptions
 app.MapGet("/", () => Results.Redirect("/dashboard/dashboard.html"));
 app.MapGet("/dashboard", () => Results.Redirect("/dashboard/dashboard.html"));
 
+// Add this line to map controller routes (should be after static files)
+app.MapControllers();
+
 // Your existing minimal API endpoint (optional—remove if using only controller)
 app.MapPost("/kill-app", () =>
 {
     try
     {
         // Execute the kill script
-        var scriptPath = "/home/samuel/Desktop/MyKY/kill_protocol.sh";
+        var scriptPath = updateThis_rootPath+"/Desktop/MyKY/kill_protocol.sh";
         var process = new System.Diagnostics.Process
         {
             StartInfo = new System.Diagnostics.ProcessStartInfo

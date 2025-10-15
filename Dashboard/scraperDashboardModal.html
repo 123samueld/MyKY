@@ -1,0 +1,185 @@
+<script>
+  // This script runs when the modal HTML is loaded into the DOM
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for the parent script to finish setup, then attach event listeners
+    setTimeout(function() {
+      const initiateBtn = document.getElementById('initiate-scrape-btn');
+      const statusOutput = document.getElementById('status-output');
+      const resultsDiv = document.getElementById('scrape-results');
+      const outputContent = document.getElementById('output-content');
+      const refreshBtn = document.getElementById('refresh-status-btn');
+      const closeBtn = document.querySelector('.modal-close-btn');
+      
+      // Initiate scrape button
+      if (initiateBtn) {
+        initiateBtn.addEventListener('click', async function() {
+          initiateBtn.disabled = true;
+          initiateBtn.textContent = 'Scraping...';
+          statusOutput.innerHTML = '<p>Initiating scrape...</p>';
+          
+          try {
+            const response = await fetch('/api/initiate-scrape', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({})
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              statusOutput.innerHTML = '<p>Scrape initiated successfully!</p>';
+              outputContent.textContent = "Scraping sites\n" + new Date().toLocaleString();
+              resultsDiv.style.display = 'block';
+            } else {
+              statusOutput.innerHTML = `<p>Error: ${data.error || 'Unknown error'}</p>`;
+              resultsDiv.style.display = 'block';
+            }
+          } catch (error) {
+            statusOutput.innerHTML = `<p>Connection error: ${error.message}</p>`;
+            console.error('Scrape initiation failed:', error);
+          } finally {
+            initiateBtn.disabled = false;
+            initiateBtn.textContent = 'Initiate Scrape Manually';
+          }
+        });
+      }
+      
+      // Refresh status button (placeholder)
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+          statusOutput.innerHTML = '<p>Status refresh not implemented yet.</p>';
+        });
+      }
+      
+      // Close button
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+          const modalOverlay = document.getElementById('scraper-dashboard-modal-overlay');
+          if (modalOverlay) {
+            modalOverlay.classList.remove('active');
+          }
+        });
+      }
+      
+      // Also handle the X close button
+      const xCloseBtn = document.getElementById('scraper-dashboard-modal-close');
+      if (xCloseBtn) {
+        xCloseBtn.addEventListener('click', function() {
+          const modalOverlay = document.getElementById('scraper-dashboard-modal-overlay');
+          if (modalOverlay) {
+            modalOverlay.classList.remove('active');
+          }
+        });
+      }
+      
+      console.log('Scraper Dashboard modal JavaScript initialized');
+    }, 100); // Small delay to ensure parent modal setup is complete
+  });
+</script>
+
+<div id="scraper-dashboard-modal-overlay" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="scraper-dashboard-modal-title">Scraper Dashboard</h3>
+      <button id="scraper-dashboard-modal-close" class="modal-close">&times;</button>
+    </div>
+    <div id="scraper-dashboard-modal-content" class="modal-body">
+      <div id="scraper-status">
+        <h4>Scraper Status</h4>
+        <div id="status-output">
+          <p>Ready to initiate manual scrape...</p>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button id="initiate-scrape-btn" class="btn btn-primary">Initiate Scrape Manually</button>
+        <button id="refresh-status-btn" class="btn btn-secondary">Refresh Status</button>
+        <button class="btn btn-secondary modal-close-btn">Close</button>
+      </div>
+      
+      <div id="scrape-results" style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 4px; max-height: 200px; overflow-y: auto; display: none;">
+        <h5>Scrape Output:</h5>
+        <pre id="output-content"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <style>
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-overlay.active {
+    display: flex;
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    max-width: 2000px;
+    width: 90%;
+    max-height: 90%;
+    height: 1600px;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+  }
+  
+  .modal-close:hover {
+    color: #000;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 20px;
+    border-top: 1px solid #eee;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+  
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+  </style>

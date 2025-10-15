@@ -2,53 +2,50 @@
 
 # Set the working directory to the script's location (app root)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$SCRIPT_DIR" || { echo "Error: Failed to change to $SCRIPT_DIR"; exit 1; }
+cd "$SCRIPT_DIR"
 
-# Read paths from the JSON file using jq
-config_file="./Utilities/FilePathCompendium.json"
-backend_dir=$(jq -r '.backendDirectory' "$config_file")
-data_dir=$(jq -r '.utilities' "$config_file")
+# Read paths from JSON (use absolute paths)
+config_file="$SCRIPT_DIR/Utilities/FilePathCompendium.json"
+backend_dir=$(jq -r '.backendDirectory | rtrimstr("/")' "$config_file")
+scraper_dir=$(jq -r '.scraperDirectory | rtrimstr("/")' "$config_file")
+csproj_path="${backend_dir}/MyKYWeb.csproj"
 
-# Construct the .csproj path as absolute
-csproj_path="$SCRIPT_DIR/$backend_dir/MyKYWeb.csproj"
-
-# Debug: Print environment and paths
-echo "DEBUG: Current directory: $(pwd)"
-echo "DEBUG: SCRIPT_DIR=$SCRIPT_DIR"
-echo "DEBUG: config_file=$config_file"
-echo "DEBUG: backend_dir=$backend_dir"
-echo "DEBUG: csproj_path=$csproj_path"
-echo "DEBUG: dotnet version: $(dotnet --version)"
-echo "DEBUG: Checking csproj existence: ls -l $csproj_path"
-
-# Check if the .csproj file exists
+# Check if the backend project file exists
 if [ ! -f "$csproj_path" ]; then
-    echo "Error: Project file $csproj_path does not exist."
-    ls -l "$SCRIPT_DIR/$backend_dir"  # Show directory contents for debugging
-    exit 1
+    exit 1  # Exit if the CSProj is not found
 fi
 
-# Check for and kill any existing dotnet processes on port 5000
-echo "DEBUG: Checking for existing dotnet processes"
-if lsof -i :5000 > /dev/null; then
-    echo "DEBUG: Killing existing process on port 5000"
-    kill -9 $(lsof -t -i :5000) || { echo "Error: Failed to kill existing process"; }
+# Create/Setup venv if needed
+if [ ! -d "$SCRIPT_DIR/venv" ]; then
+    python3 -m venv "$SCRIPT_DIR/venv"  # Create virtual environment
+    source "$SCRIPT_DIR/venv/bin/activate"
+    pip install flask  # Install flask into the virtual environment
+    deactivate
 fi
 
-# Start backend (if it's not already running)
-cd "$SCRIPT_DIR/$backend_dir" || { echo "Error: Failed to change to $SCRIPT_DIR/$backend_dir"; exit 1; }
+# Start Flask FIRST (in background, from correct dir)
+cd "$scraper_dir"  # Change to the scraper directory
+source "$SCRIPT_DIR/venv/bin/activate"  # Activate the virtual environment
+python3 scraper_endpoint.py &  # Start Flask in background
+FLASK_STARTED=$?
+cd "$SCRIPT_DIR"  # Return to project root
 
-# Clean and build to ensure latest code, comment this out for the production version.
-echo "DEBUG: Cleaning project"
-dotnet clean "$csproj_path" || { echo "Error: Clean failed"; exit 1; }
-echo "DEBUG: Building project"
-dotnet build "$csproj_path" || { echo "Error: Build failed"; exit 1; }
+# Check if Flask started successfully
+if [ $FLASK_STARTED -ne 0 ]; then
+    exit 1  # Exit if Flask fails to start
+fi
 
-echo "DEBUG: Running command: dotnet run --project \"$csproj_path\""
-dotnet run --project "$csproj_path" &
+# Start .NET backend from CORRECT directory
+cd "$backend_dir" || exit 1  # Navigate to the backend directory, exit if failed
+dotnet run --project MyKYWeb.csproj &  # Start .NET backend in background
+DOTNET_STARTED=$?
+cd "$SCRIPT_DIR"  # Return to project root
 
-# Wait a few seconds for the server to start
+# Check if .NET backend started successfully
+if [ $DOTNET_STARTED -ne 0 ]; then
+    exit 1  # Exit if .NET backend fails to start
+fi
+
+# Wait a bit for services to start before opening dashboard
 sleep 3
-
-# Open the dashboard in the browser
-xdg-open http://localhost:5000/dashboard
+xdg-open http://localhost:5000/dashboard  # Open the dashboard in the browser

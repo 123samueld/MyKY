@@ -3,18 +3,24 @@
 There are a few things you'll need to download and install for this app to work. Then there a few things you'll need to do to get the app running for the first time. Here is a quick list of downloads and actions then their description below:
 
 ### Downloaods
+* This app
 * Google Chrome
 * ChromeDriver
 * Python 3
 * Selenium
+* Flask
 * JQ
 * Asp.NET
 ### Actions
+* Date FilePathCompendium.json
 * Give permission to launch.sh
 * Test launch.sh
 * Create desktop quick launch icon
 
 ## Downloads/Installs
+
+### This app
+Get this app from Github, preferably clone it to your Desktop. 
 
 ### How to Download/Install Google Chrome
 Unfortunately the scraper depends on the Google Chrome Browser, other browsers are not an option. You will need to download Chrome, get the latest version from here: 
@@ -82,6 +88,22 @@ To test that Selenium is using the ChromeDriver correctly, first in the terminal
 
  If Selenium and the ChromeDriver and both correctly downloaded and installed, there will be a brief pause, the Chrome Browser will open with a message in the headder saying it's being controlled by automated software, it will go to google.com then the browser will close. Then a message will appear in the terminal saying "Google". This confirms Selenium and the ChromeDriver are working correctly. 
 
+### How to Download/Install Flask
+
+Flask is needed so the frontend dashboard can "talk" to the backend Python code which handles scraping. To install, in the terminal, navigate to the project root dir if not already there. Then enter this command:
+
+* pip install -r Utilities/requirements.txt
+
+To test that was installed correctly enter this command in the terminal to open a Python terminal
+
+* python3
+
+Then enter:
+
+* import flask
+* print(flask.__version__)
+
+That should return the version of Flask installed confirming it has been installed correctly.
 
 ### How to Download/Install JQ
 JQ is so launch.sh can read the a file with all the pathing to the files this app needs. This is a design choice that makes it much easier to update and refactor code, over all it's an excellent design but adds a bit of extra setup with JQ. 
@@ -110,6 +132,21 @@ To check the installation was correct enter this command:
  If installed correctly you should see "6.0.428" in the terminal response. 
 
 ## Actions
+
+### Update FilePathCompendium.json
+All the paths used in this app should be handled through 1 file, meaning you need to update 1 line in that 1 file so all paths are relative to your machine. This takes 2 stages. First let's find the root path of this app on your machine. Open a terminal and cd to the root dir of this app "MyKY". Once you're there use this terminal command:
+
+* pwd
+
+That will return something like "/home/samuel/Desktop/MyKY". Take note of the first part like "/home/samuel". 
+
+ Use your folder navigator to go to the MyKY folder, then find and go into the Utilities folder. Open the FilePathCompendium.json file. The very first variable is:  "RootPath": "/home/samuel". Change this to your root path, you found this with the "pwd" command. 
+
+ To test that your path configuration is correct, run this command from the project root directory:
+
+* ./Utilities/test_paths.sh
+
+ This will check that all the paths are correct and that key files exist. If you see any ❌ errors, fix them before proceeding. You should see mostly ✅ checkmarks if everything is configured correctly. 
 
 
 ### Give Permission to kill_protocol.sh ( "Off" button)
