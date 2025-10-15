@@ -11,6 +11,7 @@ There are a few things you'll need to download and install for this app to work.
 * JQ
 * Asp.NET
 ### Actions
+* Date FilePathCompendium.json
 * Give permission to launch.sh
 * Test launch.sh
 * Create desktop quick launch icon
@@ -127,6 +128,21 @@ To check the installation was correct enter this command:
  If installed correctly you should see "6.0.428" in the terminal response. 
 
 ## Actions
+
+### Update FilePathCompendium.json
+All the paths used in this app should be handled through 1 file, meaning you need to update 1 line in that 1 file so all paths are relative to your machine. This takes 2 stages. First let's find the root path of this app on your machine. Open a terminal and cd to the root dir of this app "MyKY". Once you're there use this terminal command:
+
+* pwd
+
+That will return something like "/home/samuel/Desktop/MyKY". Take note of the first part like "/home/samuel". 
+
+ Use your folder navigator to go to the MyKY folder, then find and go into the Utilities folder. Open the FilePathCompendium.json file. The very first variable is:  "RootPath": "/home/samuel". Change this to your root path, you found this with the "pwd" command. 
+
+ To test that your path configuration is correct, run this command from the project root directory:
+
+* ./Utilities/test_paths.sh
+
+ This will check that all the paths are correct and that key files exist. If you see any ❌ errors, fix them before proceeding. You should see mostly ✅ checkmarks if everything is configured correctly. 
 
 
 ### Give Permission to kill_protocol.sh ( "Off" button)

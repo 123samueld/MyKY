@@ -4,11 +4,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.FileProviders;
 
-// Read the RootPath from config.json
-string jsonFilePath = "../../Utilities/FilePathCompendium.json";
-string jsonString = File.ReadAllText(jsonFilePath);
-using JsonDocument doc = JsonDocument.Parse(jsonString);
-string updateThis_rootPath = doc.RootElement.GetProperty("RootPath").GetString();
+// Get RootPath from shared configuration
+string updateThis_rootPath = AppConfig.RootPath;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,9 +20,6 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var app = builder.Build();
-
-// Add this line to map controller routes
-app.MapControllers();
 
 // Enable static file serving from the Dashboard directory
 app.UseStaticFiles(new StaticFileOptions
@@ -46,6 +40,9 @@ app.UseStaticFiles(new StaticFileOptions
 // Serve the dashboard.html as the main page
 app.MapGet("/", () => Results.Redirect("/dashboard/dashboard.html"));
 app.MapGet("/dashboard", () => Results.Redirect("/dashboard/dashboard.html"));
+
+// Add this line to map controller routes (should be after static files)
+app.MapControllers();
 
 // Your existing minimal API endpoint (optional—remove if using only controller)
 app.MapPost("/kill-app", () =>

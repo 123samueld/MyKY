@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 
 namespace MyKYWeb.Controllers
 {
@@ -23,7 +24,9 @@ namespace MyKYWeb.Controllers
 
             try
             {
-                string scriptPath = "/home/samuel/Desktop/MyKY/kill_protocol.sh";
+                // Get RootPath from shared configuration
+                string updateThis_rootPath = AppConfig.RootPath;
+                string scriptPath = updateThis_rootPath + "/Desktop/MyKY/kill_protocol.sh";
                 
                 if (!System.IO.File.Exists(scriptPath))  // Fully qualify to avoid ambiguity with ControllerBase.File method
                 {
