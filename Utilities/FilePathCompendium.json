@@ -1,6 +1,12 @@
 {
+    "RootPath": "/home/samuel",
     "backendDirectory": "./DatabaseSystem/MyKYWeb/",
     "scraperDirectory": "./ScrapeSystem/",
     "utilities": "./Utilities/",
-    "imageDirectory": "./Resources/Imgs"
+    "imageDirectory": "./Resources/Imgs", 
+    "dashboard": "./Dashboard/",
+    "killProtocol": "./kill_protocol.sh",
+    "webDashboardPath": "../../Dashboard/",
+    "webResourcesPath": "../../Resources/Imgs",
+    "webKillProtocol": "../../Utilities/kill_protocol.sh"
 }

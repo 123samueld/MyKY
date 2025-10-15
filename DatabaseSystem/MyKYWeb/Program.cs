@@ -1,4 +1,17 @@
+using System;
+using System.IO;
+using System.Text.Json;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.FileProviders;
+
+// Read the RootPath from config.json
+string jsonFilePath = "../../Utilities/FilePathCompendium.json";
+string jsonString = File.ReadAllText(jsonFilePath);
+using JsonDocument doc = JsonDocument.Parse(jsonString);
+string updateThis_rootPath = doc.RootElement.GetProperty("RootPath").GetString();
+
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add this line to enable MVC controllers
 builder.Services.AddControllers();
@@ -18,7 +31,7 @@ app.MapControllers();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
-        "/home/samuel/Desktop/MyKY/Dashboard"),
+        updateThis_rootPath+"/Desktop/MyKY/Dashboard"),
     RequestPath = "/dashboard"
 });
 
@@ -26,7 +39,7 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
-        "/home/samuel/Desktop/MyKY/Resources"),
+        updateThis_rootPath+"/Desktop/MyKY/Resources"),
     RequestPath = "/resources"
 });
 
@@ -40,7 +53,7 @@ app.MapPost("/kill-app", () =>
     try
     {
         // Execute the kill script
-        var scriptPath = "/home/samuel/Desktop/MyKY/kill_protocol.sh";
+        var scriptPath = updateThis_rootPath+"/Desktop/MyKY/kill_protocol.sh";
         var process = new System.Diagnostics.Process
         {
             StartInfo = new System.Diagnostics.ProcessStartInfo
