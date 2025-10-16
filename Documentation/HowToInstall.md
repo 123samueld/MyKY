@@ -88,11 +88,17 @@ To test that Selenium is using the ChromeDriver correctly, first in the terminal
 
  If Selenium and the ChromeDriver and both correctly downloaded and installed, there will be a brief pause, the Chrome Browser will open with a message in the headder saying it's being controlled by automated software, it will go to google.com then the browser will close. Then a message will appear in the terminal saying "Google". This confirms Selenium and the ChromeDriver are working correctly. 
 
-### How to Download/Install Flask
+### How to Download/Install Flask (and Flask-CORS)
 
 Flask is needed so the frontend dashboard can "talk" to the backend Python code which handles scraping. To install, in the terminal, navigate to the project root dir if not already there. Then enter this command:
 
 * pip install -r Utilities/requirements.txt
+
+This installs Flask and Flask-CORS (for the dashboard → Python API cross-origin calls).
+
+If you previously installed requirements before this update, re-run the command above to install `flask-cors`.
+
+After installing, restart the Python scraper server so changes take effect.
 
 To test that was installed correctly enter this command in the terminal to open a Python terminal
 

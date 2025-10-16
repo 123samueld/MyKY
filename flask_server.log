@@ -1,0 +1,48 @@
+ * Serving Flask app 'scraper_endpoint'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 476-813-132
+127.0.0.1 - - [16/Oct/2025 16:10:32] "OPTIONS /api/initiate-scrape HTTP/1.1" 200 -
+127.0.0.1 - - [16/Oct/2025 16:10:32] "POST /api/initiate-scrape HTTP/1.1" 200 -
+ * Detected change in '/home/samuel/Desktop/MyKY/ScrapeSystem/scraper_central_nexus.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 476-813-132
+ * Detected change in '/home/samuel/Desktop/MyKY/ScrapeSystem/SiteScrapers/landsearch_scraper.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 476-813-132
+ * Detected change in '/home/samuel/Desktop/MyKY/ScrapeSystem/SiteScrapers/landwatch_scraper.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 476-813-132
+ * Detected change in '/home/samuel/Desktop/MyKY/ScrapeSystem/scraper_central_nexus.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 476-813-132
+ * Detected change in '/home/samuel/Desktop/MyKY/ScrapeSystem/SiteScrapers/landsearch_scraper.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 476-813-132
+ * Detected change in '/home/samuel/Desktop/MyKY/ScrapeSystem/SiteScrapers/landwatch_scraper.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 476-813-132
+ * Detected change in '/home/samuel/Desktop/MyKY/ScrapeSystem/SiteScrapers/landwatch_scraper.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 476-813-132
+ * Detected change in '/home/samuel/Desktop/MyKY/ScrapeSystem/SiteScrapers/landsearch_scraper.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 476-813-132
+ * Detected change in '/home/samuel/Desktop/MyKY/ScrapeSystem/SiteScrapers/landwatch_scraper.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 476-813-132
+127.0.0.1 - - [16/Oct/2025 16:23:09] "OPTIONS /api/initiate-scrape HTTP/1.1" 200 -
+127.0.0.1 - - [16/Oct/2025 16:23:09] "POST /api/initiate-scrape HTTP/1.1" 200 -

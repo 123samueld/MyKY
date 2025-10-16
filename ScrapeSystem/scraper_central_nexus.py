@@ -1,28 +1,77 @@
 import os
 import json
 import importlib
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+from playwright.sync_api import sync_playwright
 from config import config
 
-# List of site scraper module names (strings) in SiteScrapers/
-SITE_SCRAPERS = ["zillow_scraper"]  # Site scraper filenames (without .py extension)
+#To scrape without a visible browser, set headlessScraping to True
+headlessScraping = False
 
-def setup_selenium():
-    """Set up Selenium WebDriver with ChromeDriver in visible (non-headless) mode."""
-    chrome_options = Options()
-    # Visible window per request; comment out headless
-    # chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")  # Required for Ubuntu
-    chrome_options.add_argument("--disable-dev-shm-usage")  # Avoid shared memory issues
-    service = Service(config.chromedriver_path)  # Use ChromeDriver path from config
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    try:
-        driver.maximize_window()
-    except Exception:
-        pass
-    return driver
+# List of site scraper module names (strings) in SiteScrapers/
+SITE_SCRAPERS = ["zillow_scraper", "landsearch_scraper", "landwatch_scraper"]  # Site scraper filenames (without .py extension)
+
+class PlaywrightDriver:
+    """Playwright wrapper - mimics Selenium driver interface"""
+    def __init__(self, page):
+        self.page = page
+    
+    def get(self, url):
+        """Mimics selenium driver.get()"""
+        self.page.goto(url, wait_until="networkidle")
+    
+    def find_element(self, by, value):
+        """Mimics selenium find_element - supports CSS, XPath"""
+        if by == "css selector":
+            return PlaywrightElement(self.page.locator(value))
+        elif by == "xpath":
+            return PlaywrightElement(self.page.locator(f"xpath={value}"))
+        raise ValueError(f"Unsupported selector: {by}")
+    
+    def find_elements(self, by, value):
+        """Mimics selenium find_elements"""
+        if by == "css selector":
+            return [PlaywrightElement(self.page.locator(value).nth(i)) 
+                   for i in range(self.page.locator(value).count())]
+        elif by == "xpath":
+            return [PlaywrightElement(self.page.locator(f"xpath={value}").nth(i)) 
+                   for i in range(self.page.locator(f"xpath={value}").count())]
+        raise ValueError(f"Unsupported selector: {by}")
+    
+    def quit(self):
+        """Mimics selenium driver.quit()"""
+        pass  # Handled by central cleanup
+
+class PlaywrightElement:
+    """Mimics selenium WebElement"""
+    def __init__(self, locator):
+        self.locator = locator
+    
+    def click(self):
+        self.locator.click()
+    
+    def send_keys(self, text):
+        self.locator.fill(text)
+    
+    def text(self):
+        return self.locator.inner_text()
+    
+    def get_attribute(self, name):
+        return self.locator.get_attribute(name)
+
+def setup_playwright():
+    """Set up Playwright - VISIBLE MODE (non-headless)"""
+    playwright = sync_playwright().start()
+    browser = playwright.chromium.launch(
+        headless=headlessScraping, 
+        args=["--no-sandbox", "--disable-dev-shm-usage"]
+    )
+    context = browser.new_context(viewport={"width": 1920, "height": 1080})
+    page = context.new_page()
+    # Mimics selenium maximize_window()
+    page.set_viewport_size({"width": 1920, "height": 1080})
+    driver = PlaywrightDriver(page)
+    print("✅ Playwright ready! (Visible browser)")
+    return playwright, browser, context, driver
 
 def load_scraper_module(scraper_name):
     """Dynamically import a site scraper module from SiteScrapers/."""
@@ -53,13 +102,10 @@ def save_to_json(data, file_path=config.scraped_data_cache):
     except Exception as e:
         print(f"Error saving to JSON: {e}")
 
-def scrapeSelectedSites():
+def scrapeSelectedSites(playwright, browser, context, driver):
     """Orchestrate scraping across all site scrapers."""
     print("Scraping sites")
-    print(f"Using ChromeDriver at: {config.chromedriver_path}")
-    
-    # Set up Selenium WebDriver
-    driver = setup_selenium()
+    print(f"Using Playwright (auto-managed browser)")
     
     # Ensure cache directory exists
     cache_dir = os.path.dirname(config.scraped_data_cache)
@@ -74,6 +120,7 @@ def scrapeSelectedSites():
         if scraper_module:
             try:
                 # Assume each scraper has a scrape_site(driver) function returning list of dicts
+                # Your existing scraper code WORKS UNCHANGED!
                 site_data = scraper_module.scrape_site(driver)
                 if site_data:
                     all_data.extend(site_data)
@@ -85,17 +132,27 @@ def scrapeSelectedSites():
     if all_data:
         save_to_json(all_data)
     
-    # Clean up
-    driver.quit()
+    return all_data
 
 def main():
-    print("Scraper Central Nexus called")
+    print("🎯 Scraper Central Nexus (Playwright Edition)")
     print(f"Project root: {config.project_root}")
-    print(f"ChromeDriver path: {config.chromedriver_path}")
     print(f"Data cache: {config.scraped_data_cache}")
+    print("🚀 No more ChromeDriver paths needed!")
+    print("-" * 50)
     
-    # Run the scraping process
-    scrapeSelectedSites()
+    # Set up Playwright
+    playwright, browser, context, driver = setup_playwright()
+    
+    try:
+        # Run the scraping process
+        scrapeSelectedSites(playwright, browser, context, driver)
+    finally:
+        # Clean up
+        context.close()
+        browser.close()
+        playwright.stop()
+        print("✅ Browser closed cleanly")
 
 if __name__ == "__main__":
     main()

@@ -179,10 +179,63 @@
           });
         }
     
+        // Additional setup for Scraper Dashboard modal (attach handlers when injected)
+        const scraperDashboardAdditionalSetup = function(modalContainer) {
+          const initiateBtn = modalContainer.querySelector('#initiate-scrape-btn');
+          const statusOutput = modalContainer.querySelector('#status-output');
+          const resultsDiv = modalContainer.querySelector('#scrape-results');
+          const outputContent = modalContainer.querySelector('#output-content');
+          const refreshBtn = modalContainer.querySelector('#refresh-status-btn');
+          const closeBtn = modalContainer.querySelector('.modal-close-btn');
+
+          if (initiateBtn) {
+            initiateBtn.addEventListener('click', async function() {
+              initiateBtn.disabled = true;
+              initiateBtn.textContent = 'Scraping...';
+              if (statusOutput) statusOutput.innerHTML = '<p>Initiating scrape...</p>';
+              try {
+                const response = await fetch('http://127.0.0.1:5001/api/initiate-scrape', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({})
+                });
+                const data = await response.json().catch(() => ({ success: false, error: 'Invalid JSON response' }));
+                if (data && data.success) {
+                  if (statusOutput) statusOutput.innerHTML = '<p>Scrape initiated successfully!</p>';
+                  if (outputContent) outputContent.textContent = 'Scraping sites\n' + new Date().toLocaleString();
+                  if (resultsDiv) resultsDiv.style.display = 'block';
+                } else {
+                  if (statusOutput) statusOutput.innerHTML = `<p>Error: ${(data && data.error) || 'Unknown error'}</p>`;
+                  if (resultsDiv) resultsDiv.style.display = 'block';
+                }
+              } catch (error) {
+                if (statusOutput) statusOutput.innerHTML = `<p>Connection error: ${error.message}</p>`;
+                console.error('Scrape initiation failed:', error);
+              } finally {
+                initiateBtn.disabled = false;
+                initiateBtn.textContent = 'Initiate Scrape Manually';
+              }
+            });
+          }
+
+          if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+              if (statusOutput) statusOutput.innerHTML = '<p>Status refresh not implemented yet.</p>';
+            });
+          }
+
+          if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+              const modalOverlay = document.getElementById('scraper-dashboard-modal-overlay');
+              if (modalOverlay) modalOverlay.classList.remove('active');
+            });
+          }
+        };
+
         // Setup for other modals
         setupModal('sort-counties-btn', 'sortCountiesModal.html', 'sort-counties-', 'Sort Counties');
         setupModal('sort-properties-btn', 'sortPropertiesModal.html', 'sort-properties-', 'Sort Properties');
-        setupModal('scraper-dashboard-btn', 'scraperDashboardModal.html', 'scraper-dashboard-', 'Scraper Dashboard');
+        setupModal('scraper-dashboard-btn', 'scraperDashboardModal.html', 'scraper-dashboard-', 'Scraper Dashboard', null, scraperDashboardAdditionalSetup);
         //setupModal('scraper-dashboard-btn', 'scraperDashboardModal.html', 'scraper-dashboard-', 'Scraper Dashboard');
         
         // Additional setup for Kill Protocol's terminate button and ESC handling
@@ -249,7 +302,7 @@
                       }
                     }, 200);
                   }
-                }, index * 750);
+                }, index * 150);
               });
     
               // Delay the POST call by 4200ms

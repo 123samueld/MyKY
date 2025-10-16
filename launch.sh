@@ -18,22 +18,32 @@ fi
 # Create/Setup venv if needed
 if [ ! -d "$SCRIPT_DIR/venv" ]; then
     python3 -m venv "$SCRIPT_DIR/venv"  # Create virtual environment
-    source "$SCRIPT_DIR/venv/bin/activate"
-    pip install flask  # Install flask into the virtual environment
-    deactivate
 fi
 
 # Start Flask FIRST (in background, from correct dir)
 cd "$scraper_dir"  # Change to the scraper directory
 source "$SCRIPT_DIR/venv/bin/activate"  # Activate the virtual environment
-python3 scraper_endpoint.py &  # Start Flask in background
+
+# Ensure Python dependencies are installed (Flask, Flask-CORS)
+pip install -r "$SCRIPT_DIR/Utilities/requirements.txt" >/dev/null 2>&1
+
+# Ensure Playwright browsers are installed (Chromium)
+python3 -m playwright install chromium >/dev/null 2>&1
+
+# Start Flask in background with logging
+FLASK_LOG="$SCRIPT_DIR/flask_server.log"
+python3 scraper_endpoint.py >"$FLASK_LOG" 2>&1 &
+FLASK_PID=$!
 FLASK_STARTED=$?
 cd "$SCRIPT_DIR"  # Return to project root
 
 # Check if Flask started successfully
 if [ $FLASK_STARTED -ne 0 ]; then
-    exit 1  # Exit if Flask fails to start
+    echo "[launch] Flask failed to start (exit code $FLASK_STARTED). See $FLASK_LOG" >&2
+    exit 1
 fi
+
+echo "[launch] Flask started with PID $FLASK_PID, logging to $FLASK_LOG"
 
 # Start .NET backend from CORRECT directory
 cd "$backend_dir" || exit 1  # Navigate to the backend directory, exit if failed
