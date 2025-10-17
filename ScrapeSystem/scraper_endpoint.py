@@ -15,9 +15,18 @@ def initiate_scrape():
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
         script = os.path.join(project_root, 'ScrapeSystem', 'scraper_central_nexus.py')
 
-        # Use current python (venv) to run scraper
+        # Use current python (venv) to run scraper, with logs
         python_exec = sys.executable
-        subprocess.Popen([python_exec, script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        log_path = os.path.join(project_root, 'scraper_run.log')
+        with open(log_path, 'a') as log_file:
+            log_file.write('\n---- Scrape run ----\n')
+        log_file = open(log_path, 'a')
+        subprocess.Popen(
+            [python_exec, script],
+            cwd=os.path.dirname(script),
+            stdout=log_file,
+            stderr=log_file,
+        )
         return jsonify({"success": True, "message": "Scrape initiated"})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500

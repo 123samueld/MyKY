@@ -11,5 +11,3 @@ def scrape_site(driver) -> List[Dict]:
     driver.get(ZILLOW_KY_URL)
     # Intentionally return no scraped data at this stage
     return []
-
-

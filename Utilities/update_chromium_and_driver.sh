@@ -77,5 +77,10 @@ else
     echo "⚠️  Version mismatch - check output above"
 fi
 echo ""
-echo "🚀 NEXT: Run 'python3 scraper.py' to test!"
+echo "➡ Step 9: Installing Python deps (Playwright + Stealth)"
+python3 -m pip install --upgrade pip >/dev/null 2>&1 || true
+python3 -m pip install playwright playwright-stealth >/dev/null 2>&1 || true
+python3 -m playwright install chromium >/dev/null 2>&1 || true
+
+echo "🚀 NEXT: You can run your scraper or use launch.sh to start services."
 echo "🧹 To remove PPA later: sudo add-apt-repository --remove ppa:phd/chromium-browser-daily"

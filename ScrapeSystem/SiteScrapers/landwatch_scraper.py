@@ -10,5 +10,3 @@ def scrape_site(driver) -> List[Dict]:
     """
     driver.get(LANDWATCH_KY_URL)
     return []
-
-# https://www.landwatch.com/kentucky-land-for-sale
