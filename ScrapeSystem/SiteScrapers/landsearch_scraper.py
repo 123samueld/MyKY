@@ -1,6 +1,7 @@
 from typing import List, Dict
 import json
 import os
+from pathlib import Path
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeout  # FIXED: Proper import for timeout exception
 from datetime import datetime
 import random
@@ -11,25 +12,102 @@ from requests.adapters import HTTPAdapter  # FIXED: For retries
 from urllib3.util.retry import Retry  # FIXED: For retries
 
 LANDSEARCH_KY_URL = "https://www.landsearch.com/properties/kentucky/filter/format=sales%2Bauctions,hoa=0,pending=0,sort=-newest,structure=0"
-LANDSEARCH_CACHE_DIR = "ScrapedDataCache"
+
+# Get the correct cache directory from FilePathCompendium
+def get_cache_directory():
+    """Get the correct cache directory from FilePathCompendium.json"""
+    try:
+        # Get the project root directory
+        script_dir = Path(__file__).parent.parent.parent
+        project_root = script_dir
+        
+        # Load FilePathCompendium.json
+        config_file = project_root / "Utilities" / "FilePathCompendium.json"
+        with open(config_file, 'r') as f:
+            config = json.load(f)
+        
+        # Get the scraper cache directory
+        cache_dir = config.get('scraperCacheDirectory', './ScrapeSystem/ScrapedDataCache/')
+        
+        # Convert relative path to absolute path
+        if cache_dir.startswith('./'):
+            cache_dir = str(project_root / cache_dir[2:])
+        elif not cache_dir.startswith('/'):
+            cache_dir = str(project_root / cache_dir)
+        
+        return cache_dir
+    except Exception as e:
+        print(f"⚠️ Could not load config, using default path: {e}")
+        return "ScrapedDataCache"
+
+LANDSEARCH_CACHE_DIR = get_cache_directory()
 LANDSEARCH_CACHE_FILE = os.path.join(LANDSEARCH_CACHE_DIR, "landsearch_scrape_cache.json")
+PROGRESS_FILE = os.path.join(LANDSEARCH_CACHE_DIR, "landsearch_progress.json")
 
 def clear_landsearch_cache():
+    """Clear all cache files and directories for a fresh start"""
+    import shutil
+    
+    # Remove JSON cache files
     if os.path.exists(LANDSEARCH_CACHE_FILE):
         os.remove(LANDSEARCH_CACHE_FILE)
-        print("🗑️  Cleared landsearch_scrape_cache.json")
+        print("🗑️  Removed landsearch_scrape_cache.json")
+    
+    if os.path.exists(PROGRESS_FILE):
+        os.remove(PROGRESS_FILE)
+        print("🗑️  Removed landsearch_progress.json")
+    
+    # Remove entire ImageCache directory
+    image_cache_dir = os.path.join(LANDSEARCH_CACHE_DIR, "ImageCache")
+    if os.path.exists(image_cache_dir):
+        shutil.rmtree(image_cache_dir)
+        print("🗑️  Removed ImageCache directory and all images")
+    
+    print("✅ Cache completely cleared - ready for fresh scraping session")
+
+def load_landsearch_cache() -> List[Dict]:
+    os.makedirs(LANDSEARCH_CACHE_DIR, exist_ok=True)
+    if os.path.exists(LANDSEARCH_CACHE_FILE):
+        with open(LANDSEARCH_CACHE_FILE, 'r') as f:
+            return json.load(f)
+    return []
 
 def save_landsearch_cache(data: List[Dict]):
-    os.makedirs(LANDSEARCH_CACHE_DIR, exist_ok=True)
     with open(LANDSEARCH_CACHE_FILE, 'w') as f:
         json.dump(data, f, indent=2)
     print(f"💾 Saved {len(data)} properties to {LANDSEARCH_CACHE_FILE}")
 
+def load_progress() -> int:
+    if os.path.exists(PROGRESS_FILE):
+        with open(PROGRESS_FILE, 'r') as f:
+            data = json.load(f)
+            return data.get('current_page', 1)
+    return 1
+
+def save_progress(current_page: int):
+    with open(PROGRESS_FILE, 'w') as f:
+        json.dump({'current_page': current_page}, f)
+    print(f"📊 Updated progress to page {current_page}")
+
 def scrape_site(page: Page) -> List[Dict]:
     print("🚀 Starting LandSearch scrape... (TEST MODE: 3 properties + full details)")
+    
+    # Record scrape start time
+    scrape_start_time = datetime.now()
+    scrape_timestamp = scrape_start_time.strftime("%Y-%m-%d %H:%M:%S")
+    print(f"📅 Scrape session started at: {scrape_timestamp}")
+    
+    # Clear all cache for fresh start
     clear_landsearch_cache()
     
-    page.goto(LANDSEARCH_KY_URL, wait_until="networkidle")
+    scraped_data = []
+    existing_urls = set()
+    temp_id_counter = 1
+    total_properties = 0
+    
+    page_num = 1  # Start from page 1 for fresh session
+    
+    page.goto(LANDSEARCH_KY_URL, wait_until="networkidle")  # Initial goto to handle consent
     print("⏳ Waiting 8 seconds for SLOW MAP + POPUP...")
     sleep(8)
     
@@ -43,22 +121,30 @@ def scrape_site(page: Page) -> List[Dict]:
     except:
         print("ℹ️ No consent popup found")
     
-    print(f"📄 Page title: {page.title()}")
-    scraped_data: List[Dict] = []
-    
-    page_num = 1
-    total_properties = 0
-    
-    while total_properties < 3 and page_num <= 2:
-        print(f"\n📋 Page {page_num}...")
+    while total_properties < 3:
+        url = LANDSEARCH_KY_URL if page_num == 1 else f"{LANDSEARCH_KY_URL}/p{page_num}"
+        print(f"\n📋 Page {page_num} ({url})...")
         
-        # ✅ YOUR EXACT SELECTOR: article.preview
+        page.goto(url, wait_until="networkidle")
+        sleep(2)  # Short wait after load
+        
+        # Re-check consent if needed (though cookies should persist)
+        try:
+            cookie_button.wait_for(timeout=5000)
+            cookie_button.click()
+            sleep(1)
+        except:
+            pass
+        
         cards = page.locator('article.preview')
         card_elements = cards.all()
         print(f"🔍 Found {len(card_elements)} properties")
         
+        if len(card_elements) == 0:
+            break
+        
         for i, card in enumerate(card_elements):
-            if total_properties >= 3:  # FIXED: Was 2, but test mode is 3
+            if total_properties >= 3:
                 break
                 
             sleep(random.uniform(0.5, 1))
@@ -69,6 +155,10 @@ def scrape_site(page: Page) -> List[Dict]:
                 detail_url = link_elem.get_attribute('href')
                 if detail_url and not detail_url.startswith('http'):
                     detail_url = f"https://www.landsearch.com{detail_url}"
+                
+                if detail_url in existing_urls:
+                    print(f"  ⏭️ Skipping already scraped: {detail_url[-50:]}")
+                    continue
                 
                 # ✅ YOUR EXACT TITLE: div.preview__title
                 title_elem = card.locator('div.preview__title').first
@@ -88,7 +178,6 @@ def scrape_site(page: Page) -> List[Dict]:
                 
                 print(f"  🔗 Opening: {detail_url[-50:]}")
         
-                temp_id = total_properties + 1  # ← NEW!
                 with page.context.new_page() as detail_page:
                     # FIXED: Navigation - higher timeout, looser wait_until for slow site
                     detail_page.goto(detail_url, timeout=60000, wait_until="domcontentloaded")
@@ -96,10 +185,13 @@ def scrape_site(page: Page) -> List[Dict]:
                     sleep(5)  # Buffer for maps/images to settle
                     
                     # FIXED: Correct param order - detail_page first, then temp_id last
-                    full_details = scrape_detail_page(detail_page, address, full_address, price, acres, detail_url, temp_id)
+                    full_details = scrape_detail_page(detail_page, address, full_address, price, acres, detail_url, temp_id_counter, scrape_timestamp)
                     property_data = full_details
                 
                 scraped_data.append(property_data)
+                save_landsearch_cache(scraped_data)
+                existing_urls.add(detail_url)
+                temp_id_counter += 1
                 total_properties += 1
                 print(f"  ✅ {total_properties}/3: {price} | {acres} | {full_address}")
                 
@@ -110,21 +202,24 @@ def scrape_site(page: Page) -> List[Dict]:
         if total_properties < 3:
             next_button = page.locator('a[rel="next"]').first
             if next_button.is_visible():
-                next_button.click()
-                page.wait_for_load_state('networkidle')
-                sleep(2)
                 page_num += 1
+                save_progress(page_num)
             else:
                 break
-        else:
-            break
     
-    save_landsearch_cache(scraped_data)
+    # Clean up progress if completed
+    if os.path.exists(PROGRESS_FILE):
+        os.remove(PROGRESS_FILE)
+        print("🗑️  Removed progress file as scrape is complete")
+    
     print(f"\n🎉 LandSearch TEST COMPLETE! {len(scraped_data)} properties")
     return scraped_data
 
-def scrape_detail_page(detail_page: Page, address: str, full_address: str, price: str, acres: str, detail_url: str, temp_id: int) -> dict:
+def scrape_detail_page(detail_page: Page, address: str, full_address: str, price: str, acres: str, detail_url: str, temp_id: int, scrape_timestamp: str = None) -> dict:
     """Build COMPLETE FLAT JSON + DOWNLOAD IMAGES to ImageCache/temp_ID/"""
+    if scrape_timestamp is None:
+        scrape_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     property_data = {
         "temp_ID": temp_id,
         "site": "landsearch",
@@ -137,7 +232,8 @@ def scrape_detail_page(detail_page: Page, address: str, full_address: str, price
         "county": "",
         "elevation": "",
         "coordinates": "",
-        "detail_url": detail_url
+        "detail_url": detail_url,
+        "scrape_timestamp": scrape_timestamp
     }
     
     try:

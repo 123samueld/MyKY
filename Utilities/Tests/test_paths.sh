@@ -6,16 +6,16 @@
 echo "=== MyKY Path Configuration Test ==="
 echo
 
-# Get the current directory (should be Utilities directory)
+# Get the current directory (should be Utilities/Tests directory)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo "Current script directory: $SCRIPT_DIR"
 
-# Get the project root directory (one level up from Utilities)
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+# Get the project root directory (two levels up from Utilities/Tests)
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 echo "Project root directory: $PROJECT_ROOT"
 
 # Read the RootPath from JSON
-config_file="$SCRIPT_DIR/FilePathCompendium.json"
+config_file="$PROJECT_ROOT/Utilities/FilePathCompendium.json"
 if [ ! -f "$config_file" ]; then
     echo "❌ ERROR: FilePathCompendium.json not found at $config_file"
     exit 1
@@ -93,11 +93,12 @@ fi
 # Test ScrapeSystem configuration
 echo
 echo "Testing ScrapeSystem configuration:"
-scraper_config_test="$PROJECT_ROOT/ScrapeSystem/test_config.py"
+scraper_config_test=$(jq -r '.scraperConfigTest' "$PROJECT_ROOT/Utilities/FilePathCompendium.json")
+scraper_config_test="$PROJECT_ROOT/$scraper_config_test"
 if [ -f "$scraper_config_test" ]; then
     echo "✅ ScrapeSystem config test script exists"
     echo "   Running ScrapeSystem configuration test..."
-    cd "$PROJECT_ROOT/ScrapeSystem" && python3 test_config.py
+    cd "$PROJECT_ROOT/ScrapeSystem" && python3 "../Utilities/Tests/test_config.py"
     cd "$PROJECT_ROOT"
 else
     echo "⚠️ ScrapeSystem config test script missing: $scraper_config_test"

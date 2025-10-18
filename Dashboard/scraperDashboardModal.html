@@ -22,9 +22,12 @@
             });
             const data = await response.json();
             if (data.success) {
-              statusOutput.innerHTML = '<p>Scrape initiated successfully!</p>';
-              outputContent.textContent = 'Scraping sites\n' + new Date().toLocaleString();
+              statusOutput.innerHTML = '<p>✅ Scrape initiated successfully!</p><p><strong>🔄 Automated:</strong> Data will transfer to database automatically</p>';
+              outputContent.textContent = 'Scraping sites and transferring to database...\n' + new Date().toLocaleString();
               resultsDiv.style.display = 'block';
+              
+              // Auto-refresh properties after scraping with monitoring
+              startPropertyMonitoring();
             } else {
               statusOutput.innerHTML = `<p>Error: ${data.error || 'Unknown error'}</p>`;
               resultsDiv.style.display = 'block';
@@ -41,8 +44,65 @@
   
       if (refreshBtn) {
         refreshBtn.addEventListener('click', function() {
-          statusOutput.innerHTML = '<p>Status refresh not implemented yet.</p>';
+          refreshPropertiesList();
         });
+      }
+      
+      // Function to refresh the properties list in the main dashboard
+      function refreshPropertiesList() {
+        if (window.loadProperties) {
+          window.loadProperties();
+          statusOutput.innerHTML = '<p>✅ Properties list refreshed!</p>';
+        } else {
+          statusOutput.innerHTML = '<p>⚠️ Properties panel not found. Please refresh the page.</p>';
+        }
+      }
+      
+      // Function to monitor for new properties after scraping
+      function startPropertyMonitoring() {
+        let initialCount = 0;
+        let checkCount = 0;
+        const maxChecks = 20; // Check for 10 minutes (20 * 30 seconds)
+        
+        // Get initial property count
+        fetch('http://localhost:5000/api/property')
+          .then(response => response.json())
+          .then(properties => {
+            initialCount = properties.length;
+            statusOutput.innerHTML = `<p>🔍 Monitoring for new properties... (Current: ${initialCount})</p>`;
+            
+            // Start monitoring
+            const monitorInterval = setInterval(() => {
+              checkCount++;
+              
+              fetch('http://localhost:5000/api/property')
+                .then(response => response.json())
+                .then(properties => {
+                  const currentCount = properties.length;
+                  
+                  if (currentCount > initialCount) {
+                    // New properties found!
+                    clearInterval(monitorInterval);
+                    statusOutput.innerHTML = `<p>🎉 New properties detected! (${currentCount - initialCount} new)</p>`;
+                    refreshPropertiesList();
+                  } else if (checkCount >= maxChecks) {
+                    // Timeout reached
+                    clearInterval(monitorInterval);
+                    statusOutput.innerHTML = '<p>⏰ Monitoring timeout. No new properties detected.</p>';
+                  } else {
+                    statusOutput.innerHTML = `<p>🔍 Monitoring... (${checkCount}/${maxChecks}) - Current: ${currentCount}</p>`;
+                  }
+                })
+                .catch(error => {
+                  console.error('Error checking properties:', error);
+                  statusOutput.innerHTML = '<p>⚠️ Error checking for new properties</p>';
+                });
+            }, 30000); // Check every 30 seconds
+          })
+          .catch(error => {
+            console.error('Error getting initial property count:', error);
+            statusOutput.innerHTML = '<p>⚠️ Error starting property monitoring</p>';
+          });
       }
   
       if (closeBtn) {
@@ -75,7 +135,8 @@
       <div id="scraper-status">
         <h4>Scraper Status</h4>
         <div id="status-output">
-          <p>Ready to initiate manual scrape...</p>
+          <p>Ready to initiate scrape...</p>
+          <p><strong>🔄 Automated Flow:</strong> Scraped data will automatically transfer to database</p>
         </div>
       </div>
       

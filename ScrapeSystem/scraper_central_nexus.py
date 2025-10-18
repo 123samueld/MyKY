@@ -1,6 +1,8 @@
 import os
 import json
 import importlib
+import subprocess
+import sys
 from playwright.sync_api import sync_playwright
 from config import config
 
@@ -72,8 +74,15 @@ def load_scraper_module(scraper_name):
         print(f"Error importing {scraper_name}: {e}")
         return None
 
-def save_to_json(data, file_path=config.scraped_data_cache):
+def save_to_json(data, file_path=None):
     try:
+        # Use a proper file path instead of directory
+        if file_path is None:
+            file_path = os.path.join(config.scraped_data_cache, "combined_scrape_cache.json")
+        
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
         if os.path.exists(file_path):
             with open(file_path, 'r') as f:
                 existing_data = json.load(f)
@@ -85,6 +94,43 @@ def save_to_json(data, file_path=config.scraped_data_cache):
         print(f"Saved {len(data)} records to {file_path}")
     except Exception as e:
         print(f"Error saving to JSON: {e}")
+
+def transfer_to_database():
+    """Transfer scraped data to database via post_to_database.py"""
+    print("\n🔄 Transferring scraped data to database...")
+    print("-" * 50)
+    
+    try:
+        # Get the path to post_to_database.py
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        post_script = os.path.join(script_dir, "post_to_database.py")
+        
+        if not os.path.exists(post_script):
+            print(f"❌ post_to_database.py not found at: {post_script}")
+            return False
+        
+        # Run the post_to_database.py script
+        result = subprocess.run([sys.executable, post_script], 
+                              capture_output=True, 
+                              text=True, 
+                              cwd=script_dir)
+        
+        # Print the output
+        if result.stdout:
+            print(result.stdout)
+        if result.stderr:
+            print(f"⚠️ Warnings: {result.stderr}")
+        
+        if result.returncode == 0:
+            print("✅ Data transfer completed successfully!")
+            return True
+        else:
+            print(f"❌ Data transfer failed with return code: {result.returncode}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error during data transfer: {e}")
+        return False
 
 def scrapeSelectedSites(playwright, browser, context, driver):
     print("Scraping sites")
@@ -110,6 +156,16 @@ def scrapeSelectedSites(playwright, browser, context, driver):
     
     if all_data:
         save_to_json(all_data)
+        print(f"\n✅ Scraping completed! {len(all_data)} properties scraped")
+        
+        # Automatically transfer to database
+        transfer_success = transfer_to_database()
+        if transfer_success:
+            print("🎉 Scraping and database transfer completed successfully!")
+        else:
+            print("⚠️ Scraping completed, but database transfer failed")
+    else:
+        print("⚠️ No data was scraped")
     
     return all_data
 

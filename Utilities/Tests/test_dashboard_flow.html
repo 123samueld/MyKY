@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #results { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>MyKY Dashboard Flow Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Test API Connection</h3>
+        <button onclick="testAPI()">Test API</button>
+        <div id="api-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Test Dashboard Properties Panel</h3>
+        <button onclick="testPropertiesPanel()">Load Properties</button>
+        <div id="properties-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Open Dashboard</h3>
+        <button onclick="openDashboard()">Open Dashboard</button>
+        <p>This will open the actual dashboard where you can test the "Load Properties" button.</p>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const results = document.getElementById('api-results');
+            results.innerHTML = 'Testing API connection...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/property');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const properties = await response.json();
+                
+                results.innerHTML = `
+                    <div class="success">
+                        ✅ API Connection Successful!<br>
+                        Found ${properties.length} properties<br>
+                        Sample: ${properties[0]?.price} - ${properties[0]?.fullAddress}
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="error">
+                        ❌ API Connection Failed: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        async function testPropertiesPanel() {
+            const results = document.getElementById('properties-results');
+            results.innerHTML = 'Loading properties...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/property');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const properties = await response.json();
+                
+                if (properties.length === 0) {
+                    results.innerHTML = '<div class="error">No properties found</div>';
+                } else {
+                    const propertiesHTML = properties.map(property => `
+                        <div style="border: 1px solid #ccc; margin: 5px; padding: 10px; border-radius: 3px;">
+                            <strong>${property.price}</strong><br>
+                            ${property.fullAddress || property.address}<br>
+                            <small>${property.acres} • ${property.county} • ${property.site}</small>
+                        </div>
+                    `).join('');
+                    
+                    results.innerHTML = `
+                        <div class="success">
+                            ✅ Properties loaded successfully!<br>
+                            <strong>${properties.length} properties found:</strong>
+                            <div style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
+                                ${propertiesHTML}
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="error">
+                        ❌ Error loading properties: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        function openDashboard() {
+            window.open('http://localhost:5000/dashboard/dashboard.html', '_blank');
+        }
+    </script>
+</body>
+</html>

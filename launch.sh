@@ -45,17 +45,83 @@ fi
 
 echo "[launch] Flask started with PID $FLASK_PID, logging to $FLASK_LOG"
 
-# Start .NET backend from CORRECT directory
+# Setup database before starting .NET backend
+echo "[launch] Setting up database..."
 cd "$backend_dir" || exit 1  # Navigate to the backend directory, exit if failed
-dotnet run --project MyKYWeb.csproj &  # Start .NET backend in background
-DOTNET_STARTED=$?
-cd "$SCRIPT_DIR"  # Return to project root
 
-# Check if .NET backend started successfully
-if [ $DOTNET_STARTED -ne 0 ]; then
-    exit 1  # Exit if .NET backend fails to start
+# Check if migrations exist, if not create them
+if [ ! -d "Migrations" ]; then
+    echo "[launch] Creating initial database migration..."
+    dotnet ef migrations add InitialCreate --no-build
+    if [ $? -ne 0 ]; then
+        echo "[launch] Failed to create migration" >&2
+        exit 1
+    fi
 fi
 
+# Update database (without starting the app)
+echo "[launch] Updating database..."
+dotnet ef database update --no-build --verbose
+if [ $? -ne 0 ]; then
+    echo "[launch] Failed to update database" >&2
+    exit 1
+fi
+
+echo "[launch] Database setup complete"
+
+# Check if .NET backend is already running
+if pgrep -f "dotnet.*MyKYWeb" > /dev/null; then
+    echo "[launch] .NET backend already running, skipping startup"
+else
+    # Start .NET backend
+    echo "[launch] Starting .NET backend..."
+    dotnet run --project MyKYWeb.csproj &  # Start .NET backend in background
+    DOTNET_PID=$!
+    cd "$SCRIPT_DIR"  # Return to project root
+    echo "[launch] .NET backend started with PID $DOTNET_PID"
+fi
+
+# Wait for .NET backend to be ready
+echo "[launch] Waiting for .NET backend to be ready..."
+sleep 5
+
+# Health check for .NET backend
+echo "[launch] Checking .NET backend health..."
+for i in {1..10}; do
+    if curl -s http://localhost:5000/api/property >/dev/null 2>&1; then
+        echo "[launch] .NET backend is responding"
+        break
+    else
+        echo "[launch] Waiting for .NET backend... (attempt $i/10)"
+        sleep 2
+    fi
+done
+
+# Check if database has data, if not, try to load some
+echo "[launch] Checking if database has data..."
+cd "$scraper_dir"
+
+# Ensure Python dependencies are installed
+echo "[launch] Ensuring Python dependencies are installed..."
+source "$SCRIPT_DIR/venv/bin/activate"
+pip install -r "$SCRIPT_DIR/Utilities/requirements.txt" >/dev/null 2>&1
+
+if [ -f "ScrapedDataCache/landsearch_scrape_cache.json" ]; then
+    echo "[launch] Found cached scraped data, transferring to database..."
+    python3 post_to_database.py 2>&1 | head -20  # Show first 20 lines of output for debugging
+    TRANSFER_RESULT=${PIPESTATUS[0]}
+    if [ $TRANSFER_RESULT -eq 0 ]; then
+        echo "[launch] Data transfer successful"
+    else
+        echo "[launch] Data transfer failed (exit code: $TRANSFER_RESULT), but continuing..."
+    fi
+else
+    echo "[launch] No cached data found, database may be empty"
+fi
+
+cd "$SCRIPT_DIR"  # Return to project root
+
 # Wait a bit for services to start before opening dashboard
-sleep 3
+sleep 2
+echo "[launch] Opening dashboard..."
 xdg-open http://localhost:5000/dashboard  # Open the dashboard in the browser

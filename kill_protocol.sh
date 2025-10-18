@@ -28,6 +28,9 @@ kill_all() {
     pkill -9 -f MyKYWeb  
 
     echo "All done!"
+
+    #fuser -k 5000/tcp 
+    #fuser -k 5001/tcp  
 }
 
 # If no argument, kill all

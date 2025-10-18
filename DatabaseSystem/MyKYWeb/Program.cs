@@ -3,12 +3,17 @@ using System.IO;
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.EntityFrameworkCore;
+using MyKYWeb.Data;
 
 // Get RootPath from shared configuration
 string updateThis_rootPath = AppConfig.RootPath;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add Entity Framework
+builder.Services.AddDbContext<MyKYDbContext>(options =>
+    options.UseSqlite($"Data Source={updateThis_rootPath}/Desktop/MyKY/DatabaseSystem/MyKYWeb/mykydb.db"));
 
 // Add this line to enable MVC controllers
 builder.Services.AddControllers();

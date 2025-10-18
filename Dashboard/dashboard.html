@@ -97,6 +97,75 @@
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         z-index: 10;
       }
+      
+      #properties-panel {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 300px;
+        max-height: 60vh;
+        background: linear-gradient(145deg, rgba(240, 240, 240, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border: 5px solid;
+        border-image: linear-gradient(to right, #A9A9A9, #C0C0C0, #A9A9A9) 1;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(169, 169, 169, 0.15);
+        z-index: 10;
+        overflow-y: auto;
+      }
+      
+      #properties-panel h3 {
+        margin: 0 0 10px 0;
+        text-align: center;
+        color: #333;
+      }
+      
+      .property-item {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+      }
+      
+      .property-price {
+        font-weight: bold;
+        color: #2c5aa0;
+      }
+      
+      .property-location {
+        color: #666;
+        font-size: 0.8em;
+      }
+      
+      .property-details {
+        color: #888;
+        font-size: 0.7em;
+        margin-top: 4px;
+      }
+      
+      #load-properties-btn {
+        width: 100%;
+        padding: 8px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 10px;
+      }
+      
+      #load-properties-btn:hover {
+        background: #45a049;
+      }
+      
+      #properties-count {
+        text-align: center;
+        font-size: 0.8em;
+        color: #666;
+        margin-bottom: 10px;
+      }
 
     </style>
 <!DOCTYPE html>
@@ -357,6 +426,68 @@
     
         // Setup for Kill Protocol Modal (with additional terminate logic)
         setupModal('kill-app-btn', 'killProtocolModal.html', 'kill-protocol-', 'Kill Protocol Initiated', null, killAdditionalSetup);
+        
+        // Properties panel functionality
+        const loadPropertiesBtn = document.getElementById('load-properties-btn');
+        const refreshPropertiesBtn = document.getElementById('refresh-properties-btn');
+        const propertiesList = document.getElementById('properties-list');
+        const propertiesCount = document.getElementById('properties-count');
+        
+        // Make loadProperties function globally accessible
+        window.loadProperties = async function() {
+          if (loadPropertiesBtn) {
+            loadPropertiesBtn.click();
+          }
+        };
+        
+        // Add refresh button functionality
+        if (refreshPropertiesBtn) {
+          refreshPropertiesBtn.addEventListener('click', function() {
+            if (loadPropertiesBtn) {
+              loadPropertiesBtn.click();
+            }
+          });
+        }
+        
+        if (loadPropertiesBtn) {
+          loadPropertiesBtn.addEventListener('click', async function() {
+            loadPropertiesBtn.disabled = true;
+            loadPropertiesBtn.textContent = 'Loading...';
+            propertiesList.innerHTML = '<p>Loading properties...</p>';
+            
+            try {
+              const response = await fetch('http://localhost:5000/api/property');
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              const properties = await response.json();
+              
+              if (properties.length === 0) {
+                propertiesList.innerHTML = '<p>No properties found in database.</p>';
+                propertiesCount.textContent = '0 properties';
+              } else {
+                propertiesCount.textContent = `${properties.length} properties`;
+                propertiesList.innerHTML = properties.map(property => `
+                  <div class="property-item">
+                    <div class="property-price">${property.price}</div>
+                    <div class="property-location">${property.fullAddress || property.address}</div>
+                    <div class="property-details">
+                      ${property.acres} • ${property.county}<br>
+                      ${property.site} • Listed: ${new Date(property.listedDate).toLocaleDateString()}
+                    </div>
+                  </div>
+                `).join('');
+              }
+            } catch (error) {
+              console.error('Error loading properties:', error);
+              propertiesList.innerHTML = `<p>Error loading properties: ${error.message}</p>`;
+              propertiesCount.textContent = 'Error';
+            } finally {
+              loadPropertiesBtn.disabled = false;
+              loadPropertiesBtn.textContent = 'Load Properties';
+            }
+          });
+        }
     
         // Enhanced Escape key handler that works for ALL modals including Kill Protocol
         document.addEventListener('keydown', function(e) {
@@ -389,6 +520,14 @@
       <button id="sort-properties-btn">Sort Properties</button>
       <button id="scraper-dashboard-btn">Scraper Dashboard</button>
       <button id="kill-app-btn">Kill Protocol</button>
+    </div>
+    
+    <div id="properties-panel">
+      <h3>Properties Database</h3>
+      <button id="load-properties-btn">Load Properties</button>
+      <button id="refresh-properties-btn" style="margin-left: 5px; padding: 4px 8px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer;">🔄 Refresh</button>
+      <div id="properties-count"></div>
+      <div id="properties-list"></div>
     </div>
     <h1>MyKY</h1>
     <div class="map-container">
